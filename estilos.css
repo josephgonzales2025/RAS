@@ -12,6 +12,10 @@ h1,p {
     text-align: center;
 }
 
+h1 {
+    color: blue;
+}
+
 label {
     font-weight: bold;
 }
