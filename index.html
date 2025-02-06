@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servitrans RAS</title>
+    <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+    <h1>Bienvenidos a Servicios y Transportes RAS</h1>
+    <p>Envíos de mercadería hacia el departamento de San Martín</p>
+    <form action="procesar_formulario.php" method="post">
+        <label for="nombre">Nombre: </label><input id="nombre" type="text" placeholder="Ingrese sus nombres" required>
+        <label for="apellido">Apellido: </label><input id="apellido" type="text" placeholder="Ingrese sus apellidos" required>
+        <label for="edad">Edad: </label><input id="edad" type="number" min=18 max=99 placeholder="Ingrese su edad" required>
+        <label for="correo">Correo electrónico: </label><input id="correo" placeholder="Ingrese su correo" type="email" required>
+        <button type="submit">Enviar</button>
+    </form>
+</body>
+</html>
