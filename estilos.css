@@ -29,7 +29,7 @@ input {
 button {
     display: block;
     width: 100%;
-    background-color: #4CAF50;
+    background-color: red;
     color: white;
     border: none;
     cursor: pointer;
