@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Gestión de Clientes')
+@section('title', 'Sistema RAS')
 
 @section('content')
     <div id="mainContent">
