@@ -69,6 +69,16 @@
         </div>
         <button onclick="assignMerchandiseEntry()" class="bg-blue-500 text-white px-4 py-2 rounded shadow hover:bg-blue-600">Asignar</button>
         <hr class="my-4">
+        <div class="mb-4">
+            <label for="searchInput" class="block text-sm font-medium text-gray-700">Buscar:</label>
+            <input
+                type="text"
+                id="searchInput"
+                class="border border-gray-300 rounded px-4 py-2 w-full"
+                placeholder="Escribe el nombre del cliente o proveedor..."
+                oninput="filterTable()"
+            />
+        </div>
         <h3 class="text-lg font-semibold mb-2">Registros Asignados</h3>
         <table class="min-w-full table-auto border-collapse border border-gray-300">
             <thead>

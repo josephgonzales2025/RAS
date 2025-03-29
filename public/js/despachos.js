@@ -189,3 +189,24 @@ function loadProductsForModalD(merchandiseEntryId) {
             alert("Ocurrió un error al cargar los productos.");
         });
 }
+
+function filterTable() {
+    const searchInput = document.getElementById('searchInput').value.toLowerCase();
+    const table = document.querySelector('#assignedEntriesTableBody');
+    const rows = table.querySelectorAll('tr');
+
+    rows.forEach(row => {
+        const providerCell = row.querySelector('td:nth-child(3)'); // Columna de Proveedor
+        const clientCell = row.querySelector('td:nth-child(4)'); // Columna de Cliente
+
+        const providerText = providerCell ? providerCell.textContent.toLowerCase() : '';
+        const clientText = clientCell ? clientCell.textContent.toLowerCase() : '';
+
+        // Mostrar la fila si coincide con el texto de búsqueda
+        if (providerText.includes(searchInput) || clientText.includes(searchInput)) {
+            row.style.display = ''; // Mostrar la fila
+        } else {
+            row.style.display = 'none'; // Ocultar la fila
+        }
+    });
+}
