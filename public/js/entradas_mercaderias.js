@@ -119,7 +119,6 @@ function loadMerchandiseEntries() {
 
                 const row = document.createElement("tr");
                 row.innerHTML = `
-                    <td class="border p-2">${entry.id}</td>
                     <td class="border p-2">${entry.reception_date}</td>
                     <td class="border p-2">${entry.guide_number}</td>
                     <td class="border p-2">${entry.supplier ? entry.supplier.business_name : 'N/A'}</td>
@@ -128,10 +127,11 @@ function loadMerchandiseEntries() {
                     <td class="border p-2">${entry.client_address ? entry.client_address.zone : 'N/A'}</td>
                     <td class="border p-2">${entry.total_weight} kg</td>
                     <td class="border p-2">${entry.total_freight}</td>
-                    <td class="border p-2">${entry.status}</td>
                     <td class="border p-2">
-                        <button class="bg-blue-500 text-white p-1 rounded" onclick="openEditModal(${entry.id})">Editar</button>
-                        <button class="bg-orange-500 text-white p-1 rounded" onclick="openProductModal(${entry.id})">Ver Productos</button>
+                        <div class="flex gap-2 justify-center">
+                            <button class="bg-blue-500 text-white p-1 rounded" onclick="openEditModal(${entry.id})">Editar</button>
+                            <button class="bg-orange-500 text-white p-1 rounded" onclick="openProductModal(${entry.id})">Ver Productos</button>
+                        </div>
                     </td>
                 `;
                 tableBody.appendChild(row);
@@ -589,3 +589,24 @@ window.addEventListener('merchandiseEntryAssigned', () => {
     console.log('Ejecutando loadMerchandiseEntries');
     loadMerchandiseEntries(); // Recargar la tabla de entradas de mercancía
 });
+
+function filterTableM() {
+    const searchInput = document.getElementById('searchInput').value.toLowerCase();
+    const table = document.querySelector('#merchandiseEntriesTable');
+    const rows = table.querySelectorAll('tr');
+
+    rows.forEach(row => {
+        const providerCell = row.querySelector('td:nth-child(3)'); // Columna de Proveedor
+        const clientCell = row.querySelector('td:nth-child(4)'); // Columna de Cliente
+
+        const providerText = providerCell ? providerCell.textContent.toLowerCase() : '';
+        const clientText = clientCell ? clientCell.textContent.toLowerCase() : '';
+
+        // Mostrar la fila si coincide con el texto de búsqueda
+        if (providerText.includes(searchInput) || clientText.includes(searchInput)) {
+            row.style.display = ''; // Mostrar la fila
+        } else {
+            row.style.display = 'none'; // Ocultar la fila
+        }
+    });
+}

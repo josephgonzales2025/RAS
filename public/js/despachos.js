@@ -91,7 +91,7 @@ function loadAssignedEntries(dispatchId) {
                         <td class="border border-gray-300 px-4 py-2">${entry.guide_number}</td>
                         <td class="border border-gray-300 px-4 py-2">${entry.supplier.business_name}</td>
                         <td class="border border-gray-300 px-4 py-2">${entry.client.business_name}</td>
-                        <td class="border border-gray-300 px-4 py-2">${entry.client_address.address}</td>
+                        <td class="border border-gray-300 px-4 py-2">${entry.client_address.zone}</td>
                         <td class="border border-gray-300 px-4 py-2">${entry.total_weight} kg</td>
                         <td class="border border-gray-300 px-4 py-2">${entry.total_freight}</td>
                         <td class="border border-gray-300 px-4 py-2">

@@ -63,7 +63,7 @@
         </div>
         <div class="mb-4">
             <label for="merchandiseEntrySelect" class="block text-sm font-medium text-gray-700">Seleccionar Número de Guía</label>
-            <select id="merchandiseEntrySelect" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+            <select id="merchandiseEntrySelect" class="mt-1 block border p-2 w-full">
                 <!-- Opciones cargadas dinámicamente -->
             </select>
         </div>
@@ -86,8 +86,8 @@
                     <th class="border border-gray-300 px-4 py-2 min-w-[80px]">Fecha de Recepción</th>
                     <th class="border border-gray-300 px-4 py-2">Número de Guía</th>
                     <th class="border border-gray-300 px-4 py-2 min-w-[200px]">Proveedor</th>
-                    <th class="border border-gray-300 px-4 py-2 min-w-[250px]">Cliente</th>
-                    <th class="border border-gray-300 px-4 py-2 min-w-[200px]">Dirección</th>
+                    <th class="border border-gray-300 px-4 py-2 min-w-[350px]">Cliente</th>
+                    <th class="border border-gray-300 px-4 py-2 min-w-[150px]">Zona</th>
                     <th class="border border-gray-300 px-4 py-2 min-w-[130px]">Peso Total</th>
                     <th class="border border-gray-300 px-4 py-2">Flete Total</th>
                     <th class="border border-gray-300 px-4 py-2">Acciones</th>

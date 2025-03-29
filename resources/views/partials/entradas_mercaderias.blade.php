@@ -43,22 +43,31 @@
     </form>
 </div>
 
+<div class="mb-4">
+    <label for="searchInput" class="block text-sm font-medium text-gray-700">Buscar:</label>
+    <input
+        type="text"
+        id="searchInput"
+        class="border border-gray-300 rounded px-4 py-2 w-full"
+        placeholder="Escribe el nombre del cliente o proveedor..."
+        oninput="filterTableM()"
+    />
+</div>
+
 {{-- Tabla para listar las entradas de mercancía --}}
 <div class="bg-white p-4 rounded shadow">
     <h2 class="text-xl font-bold mb-4">Lista de Entradas de Mercancía</h2>
     <table id="merchandiseEntriesTable" class="w-full border-collapse border border-gray-300">
         <thead>
             <tr class="bg-gray-200">
-                <th class="border p-2">ID</th>
-                <th class="border p-2">Fecha de Recepción</th>
+                <th class="border p-2 min-w-[50px]">Fecha de Recepción</th>
                 <th class="border p-2">Número de Guía</th>
-                <th class="border p-2">Proveedor</th>
-                <th class="border p-2">Cliente</th>
+                <th class="border p-2 min-w-[300px]">Proveedor</th>
+                <th class="border p-2 min-w-[300px]">Cliente</th>
                 <th class="border p-2">Dirección del Cliente</th>
-                <th class="border p-2">Zona</th>
-                <th class="border p-2">Peso Total</th>
+                <th class="border p-2 min-w-[200px]">Zona</th>
+                <th class="border p-2 min-w-[80px]">Peso Total</th>
                 <th class="border p-2">Flete Total</th>
-                <th class="border p-2">Estado</th>
                 <th class="border p-2">Acciones</th>
             </tr>
         </thead>

@@ -46,14 +46,14 @@
     <div class="grid grid-cols-2 gap-6">
         <div>
             <label for="dispatchFilter" class="block text-sm font-medium text-gray-700">Seleccionar Despacho:</label>
-            <select id="dispatchFilter" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" onchange="fetchDispatchTotals()">
+            <select id="dispatchFilter" class="mt-1 block border p-2 w-full" onchange="fetchDispatchTotals()">
                 <option value="">Seleccione un Despacho</option>
                 <!-- Opciones cargadas dinámicamente -->
             </select>
         </div>
         <div>
             <label for="clientFilter" class="block text-sm font-medium text-gray-700">Filtrar por Cliente:</label>
-            <select id="clientFilter" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" onchange="fetchDispatchTotals()">
+            <select id="clientFilter" class="mt-1 block border p-2 w-full" onchange="fetchDispatchTotals()">
                 <option value="">Todos los Clientes</option>
                 <!-- Opciones cargadas dinámicamente -->
             </select>
