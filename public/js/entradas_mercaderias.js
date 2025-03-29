@@ -11,6 +11,28 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
+function validateNumericInput(input) {
+    // Obtén la posición actual del cursor
+    const cursorPosition = input.selectionStart;
+
+    // Permitir solo números y un punto decimal
+    let sanitizedValue = input.value.replace(/[^0-9.]/g, ''); // Elimina caracteres no válidos
+
+    // Evitar múltiples puntos decimales
+    const parts = sanitizedValue.split('.');
+    if (parts.length > 2) {
+        sanitizedValue = parts[0] + '.' + parts[1]; // Mantén solo el primer punto decimal
+    }
+
+    // Asigna el valor limpio al input solo si ha cambiado
+    if (input.value !== sanitizedValue) {
+        input.value = sanitizedValue;
+
+        // Restaura la posición del cursor
+        input.setSelectionRange(cursorPosition, cursorPosition);
+    }
+}
+
 function loadSuppliersM() {
     fetch('/api/suppliers')
         .then(response => response.json())
@@ -79,6 +101,14 @@ function loadClientAddresses() {
 }
 
 function loadMerchandiseEntries() {
+    const tableBody = document.querySelector("#merchandiseEntriesTable tbody");
+
+    // Verificar si el elemento existe
+    if (!tableBody) {
+        console.warn("El elemento #merchandiseEntriesTable tbody no existe en el DOM.");
+        return; // Salir de la función si el elemento no existe
+    }
+
     fetch('/api/merchandise-entries') // Llama a la API para obtener las entradas de mercancía
         .then(response => response.json())
         .then(data => {
@@ -554,3 +584,8 @@ function deleteProduct(productId, merchandiseEntryId) {
             alert("Ocurrió un error al eliminar el producto. Por favor, inténtelo de nuevo.");
         });
 }
+
+window.addEventListener('merchandiseEntryAssigned', () => {
+    console.log('Ejecutando loadMerchandiseEntries');
+    loadMerchandiseEntries(); // Recargar la tabla de entradas de mercancía
+});

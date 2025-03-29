@@ -11,11 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('trucks', function (Blueprint $table) {
+        Schema::create('dispatches', function (Blueprint $table) {
             $table->id();
-            $table->string('plate_number', 20)->unique(); // Placa del camión
-            $table->string('model', 50); // Modelo del camión
-            $table->string('driver_name', 100); // Nombre del conductor
+            $table->date('dispatch_date');
+            $table->string('driver_name');
+            $table->string('driver_license');
+            $table->string('transport_company_name');
+            $table->string('transport_company_ruc');
             $table->timestamps();
         });
     }
@@ -25,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('trucks');
+        Schema::dropIfExists('dispatches');
     }
 };

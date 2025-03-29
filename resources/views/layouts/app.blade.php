@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Mi Aplicación')</title>
     <script src="https://cdn.tailwindcss.com"></script> <!-- Framework CSS Tailwind -->
+    <link rel="stylesheet" href="{{ asset('css/custom.css') }}"> <!-- Archivo CSS personalizado -->
 </head>
 <body class="bg-gray-100 flex">
     <!-- Menú lateral -->
@@ -15,6 +16,7 @@
             <li class="mb-2"><a href="#" class="block p-2 hover:bg-gray-700" data-section="clientes">Clientes</a></li>
             <li class="mb-2"><a href="#" class="block p-2 hover:bg-gray-700" data-section="proveedores">Proveedores</a></li>
             <li class="mb-2"><a href="#" class="block p-2 hover:bg-gray-700" data-section="entradas_mercaderias">Recepción</a></li>
+            <li class="mb-2"><a href="#" class="block p-2 hover:bg-gray-700" data-section="despachos">Despachos</a></li>
         </ul>
     </aside>
 

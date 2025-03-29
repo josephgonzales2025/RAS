@@ -21,7 +21,6 @@ return new class extends Migration
             $table->decimal('total_weight', 10, 2);
             $table->decimal('total_freight', 10, 2);
             $table->enum('status', ['Pending', 'Dispatched'])->default('Pending');
-            $table->foreignId('dispatch_id')->nullable()->constrained('dispatches')->nullOnDelete();
             $table->timestamps();
         });
     }

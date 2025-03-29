@@ -13,4 +13,14 @@ class ClientAddress extends Model
     public function client() {
         return $this->belongsTo(Client::class);
     }
+
+    public function setAddressAttribute($value)
+    {
+        $this->attributes['address'] = strtoupper($value);
+    }
+
+    public function setZoneAttribute($value)
+    {
+        $this->attributes['zone'] = strtoupper($value);
+    }
 }

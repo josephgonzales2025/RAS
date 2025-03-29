@@ -11,11 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('dispatches', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('truck_id')->constrained()->onDelete('cascade'); // Relación con camiones
-            $table->date('date'); // Fecha del despacho
-            $table->timestamps();
+        Schema::table('merchandise_entries', function (Blueprint $table) {
+            $table->foreignId('dispatch_id')->nullable()->constrained('dispatches')->onDelete('cascade');
         });
     }
 
@@ -24,6 +21,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('dispatches');
+        Schema::table('merchandise_entries', function (Blueprint $table) {
+            $table->dropForeign(['dispatch_id']);
+            $table->dropColumn('dispatch_id');
+        });
     }
 };

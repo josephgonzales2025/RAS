@@ -20,6 +20,7 @@
     <script src="{{ asset('js/clientes.js') }}"></script>
     <script src="{{ asset('js/proveedores.js')}}"></script>
     <script src="{{ asset('js/entradas_mercaderias.js') }}"></script>
+    <script src="{{ asset('js/despachos.js') }}"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const links = document.querySelectorAll("aside a[data-section]");
@@ -60,6 +61,9 @@
                             if (section === "entradas_mercaderias") {
                                 initializeEntradas_Mercaderias(); // Llama a la función para inicializar la vista de entradas de mercancía
                             }
+                            if (section === "despachos") {
+                                initializeDespachos(); // Llama a la función para inicializar la vista de despachos
+                            }
                         })
                         .catch(error => {
                             console.error(error);
@@ -99,6 +103,13 @@
             loadClientsM();
             loadMerchandiseEntries();
 
+            // Verificar si se debe recargar la tabla
+            if (localStorage.getItem('reloadMerchandiseEntries') === 'true') {
+                console.log('Recargando la tabla de entradas de mercancía...');
+                loadMerchandiseEntries();
+                localStorage.removeItem('reloadMerchandiseEntries'); // Eliminar el indicador
+            }
+
             document.getElementById("addMerchandiseEntryForm").addEventListener("submit", function (event) {
                 event.preventDefault();
                 addMerchandiseEntry();
@@ -113,5 +124,48 @@
                 }
             });
         }
+
+        function initializeDespachos() {
+            console.log("Inicializando la vista de despachos...");
+
+            // Cargar los despachos en la tabla
+            loadDispatches();
+
+            // Manejador para el formulario de creación de despachos
+            const form = document.getElementById('createDispatchForm');
+            if (form) {
+                form.addEventListener('submit', function (event) {
+                    event.preventDefault(); // Evita que el formulario recargue la página
+
+                    const formData = new FormData(this);
+                    const data = Object.fromEntries(formData.entries());
+
+                    fetch('/api/dispatches', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(data),
+                    })
+                        .then(async response => {
+                            if (!response.ok) {
+                                const errorText = await response.text();
+                                throw new Error(`Error del servidor: ${response.status} - ${errorText}`);
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            alert('Despacho creado con éxito');
+                            this.reset(); // Limpia el formulario
+                            loadDispatches(); // Recarga la tabla de despachos
+                        })
+                        .catch(error => {
+                            console.error('Error al crear el despacho:', error);
+                            alert('Ocurrió un error al crear el despacho. Por favor, inténtelo de nuevo.');
+                        });
+                });
+            }
+        }
+        
     </script>
 @endsection

@@ -33,11 +33,11 @@
         </div>
         <div class="mb-2">
             <label for="total_weight" class="block">Peso Total (kg):</label>
-            <input type="number" id="total_weight" name="total_weight" class="border p-2 w-full" step="0.01" required>
+            <input type="number" id="total_weight" name="total_weight" class="border p-2 w-full" step="0.01" required oninput="validateNumericInput(this)">
         </div>
         <div class="mb-2">
             <label for="total_freight" class="block">Flete Total:</label>
-            <input type="number" id="total_freight" name="total_freight" class="border p-2 w-full" step="0.01" required>
+            <input type="number" id="total_freight" name="total_freight" class="border p-2 w-full" step="0.01" required oninput="validateNumericInput(this)">
         </div>
         <button type="submit" class="bg-blue-500 text-white p-2 rounded">Agregar Entrada</button>
     </form>

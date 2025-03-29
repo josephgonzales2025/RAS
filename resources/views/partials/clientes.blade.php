@@ -1,10 +1,18 @@
 <h1 class="text-2xl font-bold mb-4">Gestión de Clientes</h1>
-<div class="bg-white p-4 rounded shadow">
+<div class="bg-white p-4 rounded shadow mb-6">
     <h2 class="text-xl font-bold mb-4">Agregar Cliente</h2>
         <form id="addClientForm">
             <div class="mb-2">
-                <label class="block">RUC/DNI:</label>
-                <input type="text" id="rucDni" class="border p-2 w-full" required>
+                <label for="rucDni" class="block text-sm font-medium text-gray-700">RUC/DNI:</label>
+                <input 
+                    type="text" 
+                    id="rucDni" 
+                    class="border p-2 w-full"  
+                    maxlength="11" 
+                    pattern="\d{8}|\d{11}" 
+                    title="Debe ingresar 8 o 11 dígitos" 
+                    oninput="validateRucDni(this)"
+                >
             </div>
             <div class="mb-2">
                 <label class="block">Razón Social:</label>

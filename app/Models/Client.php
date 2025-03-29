@@ -17,4 +17,9 @@ class Client extends Model
     public function merchandiseEntries() {
         return $this->hasMany(MerchandiseEntry::class);
     }
+
+    public function setBusinessNameAttribute($value)
+    {
+        $this->attributes['business_name'] = strtoupper($value);
+    }
 }

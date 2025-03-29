@@ -7,7 +7,7 @@ Route::get('/', function () {
 });
 
 Route::get('/partials/{section}', function ($section) {
-    $validSections = ['entradas_mercaderias', 'proveedores','clientes', 'dashboard']; // Lista de secciones válidas
+    $validSections = ['despachos','entradas_mercaderias', 'proveedores','clientes', 'dashboard']; // Lista de secciones válidas
 
     if (in_array($section, $validSections)) {
         return view("partials.$section");

@@ -11,6 +11,16 @@ function loadClients() {
         });
 }
 
+function validateRucDni(input) {
+    // Elimina cualquier carácter que no sea un número
+    input.value = input.value.replace(/[^0-9]/g, '');
+
+    // Limita la longitud a 8 o 11 caracteres
+    if (input.value.length > 11) {
+        input.value = input.value.slice(0, 11);
+    }
+}
+
 function appendClientRow(client) {
     let tableBody = document.querySelector("#clientsTable tbody");
     let row = document.createElement("tr");

@@ -13,4 +13,14 @@ class ProductEntry extends Model
     public function merchandiseEntry() {
         return $this->belongsTo(MerchandiseEntry::class);
     }
+
+    public function setProductNameAttribute($value)
+    {
+        $this->attributes['product_name'] = strtoupper($value);
+    }
+
+    public function setTypeAttribute($value)
+    {
+        $this->attributes['type'] = strtoupper($value);
+    }
 }

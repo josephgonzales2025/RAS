@@ -61,18 +61,10 @@ class MerchandiseEntryController
             'client_id' => 'sometimes|required|exists:clients,id',
             'address_id' => 'sometimes|required|exists:client_addresses,id',
             'total_weight' => 'sometimes|required|numeric|min:0',
-            'total_freight' => 'sometimes|required|numeric|min:0',
-            'dispatch_id' => 'sometimes|required|exists:dispatches,id',
+            'total_freight' => 'sometimes|required|numeric|min:0'
         ]);
 
         $merchandiseEntry->update($validated);
-
-        // ✅ Asegurar que el estado cambie automáticamente
-        if ($merchandiseEntry->dispatch_id) {
-            $merchandiseEntry->status = 'Dispatched';
-        } else {
-            $merchandiseEntry->status = 'Pending';
-        }
 
         $merchandiseEntry->save();
 
@@ -89,5 +81,19 @@ class MerchandiseEntryController
         return response()->json(['message' => 'Merchandise entry deleted successfully']);
     }
 
-
+    public function getZones()
+    {
+        try {
+            // Realiza un join con la tabla client_addresses para obtener las zonas únicas
+            $zones = MerchandiseEntry::join('client_addresses', 'merchandise_entries.client_address_id', '=', 'client_addresses.id')
+                ->distinct()
+                ->pluck('client_addresses.zone');
+    
+            // Devuelve las zonas como JSON
+            return response()->json($zones);
+        } catch (\Exception $e) {
+            // Maneja cualquier error y devuelve un mensaje de error
+            return response()->json(['error' => 'Error al obtener las zonas'], 500);
+        }
+    }
 }
