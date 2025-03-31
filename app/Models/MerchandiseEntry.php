@@ -42,5 +42,10 @@ class MerchandiseEntry extends Model
     {
         return $this->belongsTo(Dispatch::class);
     }
+
+    public function setGuideNumberAttribute($value)
+    {
+        $this->attributes['guide_number'] = strtoupper($value);
+    }
     
 }

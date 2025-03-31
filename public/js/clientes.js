@@ -73,6 +73,7 @@ function editClient(id, rucDni, businessName) {
         })
         .then(response => response.json())
         .then(data => {
+            alert("Cliente registrado con éxito.");
             document.querySelector(`#row-${id} td:nth-child(3)`).textContent = newBusinessName;
             // Actualiza la celda del RUC/DNI
             document.querySelector(`#row-${id} td:nth-child(2)`).textContent = newrucDni;
