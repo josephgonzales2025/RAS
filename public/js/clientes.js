@@ -63,16 +63,19 @@ function addClient() {
 }
 
 function editClient(id, rucDni, businessName) {
+    let newrucDni = prompt("Editar ruc o dni", rucDni);
     let newBusinessName = prompt("Editar Razón Social", businessName);
     if (newBusinessName !== null) {
         fetch(`/api/clients/${id}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ business_name: newBusinessName })
+            body: JSON.stringify({ ruc_dni:newrucDni, business_name: newBusinessName })
         })
         .then(response => response.json())
         .then(data => {
             document.querySelector(`#row-${id} td:nth-child(3)`).textContent = newBusinessName;
+            // Actualiza la celda del RUC/DNI
+            document.querySelector(`#row-${id} td:nth-child(2)`).textContent = newrucDni;
         })
         .catch(error => console.error("Error al actualizar cliente:", error));
     }
