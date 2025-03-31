@@ -429,7 +429,7 @@ function loadProductsForModal(merchandiseEntryId) {
                 li.innerHTML = `
                     <span class="flex-1">${product.product_name} - ${product.quantity} - ${product.type}</span>
                     <div class="flex gap-2">
-                        <button class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-sm" onclick="editProduct(${product.id}, '${product.product_name}', ${product.quantity}, '${product.type}')">
+                        <button class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-sm" onclick="editProduct(${product.id}, ${JSON.stringify(product.product_name).replace(/"/g, '&quot;')}, ${product.quantity}, '${product.type}')">
                             Editar
                         </button>
                         <button class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm" onclick="deleteProduct(${product.id}, ${merchandiseEntryId})">
