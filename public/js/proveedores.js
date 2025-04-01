@@ -21,7 +21,7 @@ function appendSupplierRow(supplier) {
         <td class='border p-2'>${supplier.ruc_dni}</td>
         <td class='border p-2'>${supplier.business_name}</td>
         <td class='border p-2'>
-            <a href="#" class="bg-blue-700 text-white p-1 rounded" onclick="editSupplier(${supplier.id}, '${supplier.ruc_dni}', '${supplier.business_name}')">Editar</a>
+            <a href="#" class="bg-blue-700 text-white p-1 rounded" onclick="editSupplier(${supplier.id}, '${supplier.ruc_dni}', '${supplier.business_name.replace(/'/g, "\\'")}')">Editar</a>
         </td>
     `;
     tableBody.appendChild(row);
@@ -38,17 +38,7 @@ function addSuppliers() {
     })
     .then(response => response.json())
     .then(data => {
-        // Mostrar mensaje de éxito
-        const messageContainer = document.getElementById("messageContainer");
-        messageContainer.textContent = "Proveedor agregado satisfactoriamente.";
-        messageContainer.classList.remove("hidden");
-        messageContainer.classList.add("bg-green-100", "text-green-800");
-
-        // Ocultar el mensaje después de 3 segundos
-        setTimeout(() => {
-            messageContainer.classList.add("hidden");
-        }, 3000);
-
+        alert("Proveedor registrado con éxito.")
         appendSupplierRow(data); // Agrega el nuevo proveedor a la tabla
         document.getElementById("addSupplierForm").reset();
     })

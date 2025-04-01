@@ -37,6 +37,7 @@ function loadSuppliersM() {
     fetch('/api/suppliers')
         .then(response => response.json())
         .then(data => {
+            data.sort((a, b) => (a.business_name || "").localeCompare(b.business_name || ""));
             const supplierSelect = $('#supplier_id');
             supplierSelect.empty(); // Limpia las opciones existentes
             supplierSelect.append(new Option("Escoja un proveedor", "")); // Agrega la opción predeterminada
@@ -51,6 +52,7 @@ function loadClientsM() {
     fetch('/api/clients')
         .then(response => response.json())
         .then(data => {
+            data.sort((a, b) => (a.business_name || "").localeCompare(b.business_name || ""));
             const clientSelect = $('#client_id');
             clientSelect.empty(); // Limpia las opciones existentes
             clientSelect.append(new Option("Escoja un cliente", ""));

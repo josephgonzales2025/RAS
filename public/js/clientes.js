@@ -31,7 +31,7 @@ function appendClientRow(client) {
         <td class='border p-2'>${client.ruc_dni}</td>
         <td class='border p-2'>${client.business_name}</td>
         <td class='border p-2'>
-            <a href="#" class="bg-blue-700 text-white p-1 rounded" onclick="editClient(${client.id}, '${client.ruc_dni}', '${client.business_name}')">Editar</a> |
+            <a href="#" class="bg-blue-700 text-white p-1 rounded" onclick="editClient(${client.id}, '${client.ruc_dni}', '${client.business_name.replace(/'/g, "\\'")}')">Editar</a> |
             <button class="bg-green-700 text-white p-1 rounded" onclick="showAddressForm(${client.id})">Añadir Dirección</button>
             <button class="bg-purple-700 text-white p-1 rounded" onclick="loadAddresses(${client.id})">Ver Direcciones</button>
             <div id="addressForm-${client.id}" class="hidden mt-2">
