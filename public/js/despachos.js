@@ -62,7 +62,7 @@ function loadAvailableMerchandiseEntries() {
                     const zoneB = b.client_address.zone.toUpperCase();
                     return zoneA.localeCompare(zoneB);
                 });
-                
+
                 // Si hay registros, los agrega al combobox
                 data.forEach(entry => {
                     const option = document.createElement('option');
@@ -143,13 +143,30 @@ function removeAssignedEntry(dispatchId, merchandiseEntryId) {
     fetch(`/api/dispatches/${dispatchId}/remove/${merchandiseEntryId}`, {
         method: 'DELETE',
     })
-        .then(response => response.json())
-        .then(data => {
-            alert('Registro eliminado con éxito');
-            loadAssignedEntries(dispatchId); // Recargar los registros asignados
-            loadAvailableMerchandiseEntries(); // Recargar los números de guía disponibles
+        .then(async response => {
+            const contentType = response.headers.get("content-type");
+
+            if (!response.ok) {
+                if (contentType && contentType.includes("application/json")) {
+                    const errorData = await response.json();
+                    alert(`Error: ${errorData.message}`);
+                } else {
+                    const errorText = await response.text();
+                    console.error("Error HTML:", errorText);
+                    alert("Ocurrió un error inesperado (no es JSON)");
+                }
+                return;
+            }
+
+            const data = await response.json();
+            alert(data.message);
+            loadAssignedEntries(dispatchId);
+            loadAvailableMerchandiseEntries();
         })
-        .catch(error => console.error('Error al eliminar el registro:', error));
+        .catch(error => {
+            console.error('Error al eliminar el registro:', error);
+            alert('No se pudo eliminar el registro');
+        });
 }
 
 function openProductModalD(merchandiseEntryId) {
