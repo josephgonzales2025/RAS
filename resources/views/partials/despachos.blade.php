@@ -80,23 +80,27 @@
             />
         </div>
         <h3 class="text-lg font-semibold mb-2">Registros Asignados</h3>
-        <table class="min-w-full table-auto border-collapse border border-gray-300">
-            <thead>
-                <tr class="bg-gray-100">
-                    <th class="border border-gray-300 px-4 py-2 min-w-[80px]">Fecha de Recepción</th>
-                    <th class="border border-gray-300 px-4 py-2">Número de Guía</th>
-                    <th class="border border-gray-300 px-4 py-2 min-w-[200px]">Proveedor</th>
-                    <th class="border border-gray-300 px-4 py-2 min-w-[350px]">Cliente</th>
-                    <th class="border border-gray-300 px-4 py-2 min-w-[150px]">Zona</th>
-                    <th class="border border-gray-300 px-4 py-2 min-w-[130px]">Peso Total</th>
-                    <th class="border border-gray-300 px-4 py-2">Flete Total</th>
-                    <th class="border border-gray-300 px-4 py-2">Acciones</th>
-                </tr>
-            </thead>
-            <tbody id="assignedEntriesTableBody">
-                <!-- Registros asignados cargados dinámicamente -->
-            </tbody>
-        </table>
+        
+        <!-- AQUI va el scroll -->
+        <div class="overflow-y-auto max-h-96 border border-gray-300 rounded">
+            <table class="min-w-full table-auto border-collapse">
+                <thead>
+                    <tr class="bg-gray-100">
+                        <th class="border border-gray-300 px-4 py-2 min-w-[80px]">Fecha de Recepción</th>
+                        <th class="border border-gray-300 px-4 py-2">Número de Guía</th>
+                        <th class="border border-gray-300 px-4 py-2 min-w-[200px]">Proveedor</th>
+                        <th class="border border-gray-300 px-4 py-2 min-w-[350px]">Cliente</th>
+                        <th class="border border-gray-300 px-4 py-2 min-w-[150px]">Zona</th>
+                        <th class="border border-gray-300 px-4 py-2 min-w-[130px]">Peso Total</th>
+                        <th class="border border-gray-300 px-4 py-2">Flete Total</th>
+                        <th class="border border-gray-300 px-4 py-2">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="assignedEntriesTableBody">
+                    <!-- Registros asignados cargados dinámicamente -->
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
