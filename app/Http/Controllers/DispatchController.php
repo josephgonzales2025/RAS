@@ -70,13 +70,27 @@ class DispatchController
      */
     public function removeMerchandiseEntry(Dispatch $dispatch, MerchandiseEntry $merchandiseEntry)
     {
-        if ($merchandiseEntry->dispatch_id !== $dispatch->id) {
-            return response()->json(['message' => 'La entrada de mercancía no pertenece a este despacho'], 400);
+        try {
+            if ($merchandiseEntry->dispatch_id !== $dispatch->id) {
+                return response()->json(['message' => 'La entrada de mercancía no pertenece a este despacho'], 400);
+            }
+
+            $merchandiseEntry->update([
+                'dispatch_id' => null,
+                'status' => 'pending',
+            ]);
+
+            return response()->json([
+                'message' => 'Entrada de mercancía eliminada del despacho con éxito',
+                'merchandiseEntry' => $merchandiseEntry,
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error interno del servidor',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        $merchandiseEntry->update(['dispatch_id' => null, 'status' => 'pending']);
-
-        return response()->json(['message' => 'Entrada de mercancía eliminada del despacho con éxito', 'merchandiseEntry' => $merchandiseEntry]);
     }
 
     public function getDispatchTotals(Request $request, $dispatchId)

@@ -147,25 +147,37 @@ function removeAssignedEntry(dispatchId, merchandiseEntryId) {
             const contentType = response.headers.get("content-type");
 
             if (!response.ok) {
+                // Si es JSON, mostrar el mensaje del backend
                 if (contentType && contentType.includes("application/json")) {
                     const errorData = await response.json();
-                    alert(`Error: ${errorData.message}`);
-                } else {
-                    const errorText = await response.text();
-                    console.error("Error HTML:", errorText);
-                    alert("Ocurrió un error inesperado (no es JSON)");
+                    alert(`Error: ${errorData.message || 'Error desconocido'}`);
+                    console.error("Detalles:", errorData);
                 }
+                // Si viene HTML (por ejemplo, un error del servidor como 500)
+                else if (contentType && contentType.includes("text/html")) {
+                    const errorHtml = await response.text();
+                    console.error("Error HTML recibido:", errorHtml);
+                    alert("Ocurrió un error interno del servidor (500)");
+                }
+                // Otros tipos de contenido no esperados
+                else {
+                    const errorText = await response.text();
+                    console.error("Respuesta no esperada:", errorText);
+                    alert("Error inesperado al procesar la solicitud.");
+                }
+
                 return;
             }
 
+            // Si fue exitoso
             const data = await response.json();
             alert(data.message);
             loadAssignedEntries(dispatchId);
             loadAvailableMerchandiseEntries();
         })
         .catch(error => {
-            console.error('Error al eliminar el registro:', error);
-            alert('No se pudo eliminar el registro');
+            console.error('Error de red o al eliminar el registro:', error);
+            alert('No se pudo eliminar el registro (error de red o servidor)');
         });
 }
 
