@@ -55,11 +55,19 @@ function loadAvailableMerchandiseEntries() {
                 select.appendChild(option);
                 select.disabled = true; // Desactiva el combobox
             } else {
+
+                // Ordenar los datos por zona (alfabéticamente)
+                data.sort((a, b) => {
+                    const zoneA = a.client_address.zone.toUpperCase();
+                    const zoneB = b.client_address.zone.toUpperCase();
+                    return zoneA.localeCompare(zoneB);
+                });
+                
                 // Si hay registros, los agrega al combobox
                 data.forEach(entry => {
                     const option = document.createElement('option');
                     option.value = entry.id;
-                    option.textContent = `${entry.guide_number} - ${entry.client.business_name}`;
+                    option.textContent = `${entry.guide_number} - ${entry.client.business_name} - ${entry.client_address.zone}`;
                     select.appendChild(option);
                 });
                 select.disabled = false; // Activa el combobox
