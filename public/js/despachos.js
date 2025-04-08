@@ -81,18 +81,30 @@ function loadAssignedEntries(dispatchId) {
         .then(response => response.json())
         .then(data => {
             const tableBody = document.getElementById('assignedEntriesTableBody');
-            tableBody.innerHTML = ''; // Limpia la tabla antes de cargar los datos
+            tableBody.innerHTML = '';
 
             if (!data.merchandise_entries || data.merchandise_entries.length === 0) {
-                // Si no hay registros asignados, muestra un mensaje en la tabla
+                // Mensaje si no hay registros
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td class="border border-gray-300 px-4 py-2 text-center" colspan="3">No hay registros asignados</td>
+                    <td class="border border-gray-300 px-4 py-2 text-center" colspan="8">No hay registros asignados</td>
                 `;
                 tableBody.appendChild(row);
             } else {
-                // Si hay registros asignados, los muestra en la tabla
-                data.merchandise_entries.forEach(entry => {
+                // Ordena los registros: primero por zona, luego por cliente
+                const sortedEntries = data.merchandise_entries.sort((a, b) => {
+                    const zoneA = a.client_address.zone.toLowerCase();
+                    const zoneB = b.client_address.zone.toLowerCase();
+                    const clientA = a.client.business_name.toLowerCase();
+                    const clientB = b.client.business_name.toLowerCase();
+
+                    if (zoneA < zoneB) return -1;
+                    if (zoneA > zoneB) return 1;
+                    return clientA.localeCompare(clientB); // Si las zonas son iguales, ordena por cliente
+                });
+
+                // Renderiza los registros ordenados
+                sortedEntries.forEach(entry => {
                     const row = document.createElement('tr');
                     row.innerHTML = `
                         <td class="border border-gray-300 px-4 py-2">${entry.reception_date}</td>
