@@ -247,12 +247,14 @@ function filterTable() {
     rows.forEach(row => {
         const providerCell = row.querySelector('td:nth-child(3)'); // Columna de Proveedor
         const clientCell = row.querySelector('td:nth-child(4)'); // Columna de Cliente
+        const zoneCell = row.querySelector('td:nth-child(5)'); // Columna de Zona
 
         const providerText = providerCell ? providerCell.textContent.toLowerCase() : '';
         const clientText = clientCell ? clientCell.textContent.toLowerCase() : '';
+        const zoneText = zoneCell ? zoneCell.textContent.toLowerCase() : '';
 
         // Mostrar la fila si coincide con el texto de búsqueda
-        if (providerText.includes(searchInput) || clientText.includes(searchInput)) {
+        if (providerText.includes(searchInput) || clientText.includes(searchInput) || zoneText.includes(searchInput)) {
             row.style.display = ''; // Mostrar la fila
         } else {
             row.style.display = 'none'; // Ocultar la fila
