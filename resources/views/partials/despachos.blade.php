@@ -57,6 +57,7 @@
     <div class="bg-white rounded-lg shadow-lg w-3/4 p-6">
         <div class="flex justify-between items-center mb-4">
             <h2 class="text-xl font-semibold">Asignar Registros al Despacho</h2>
+            
             <button onclick="closeAssignModal()" class="text-gray-500 hover:text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-full w-8 h-8 flex items-center justify-center shadow">
                 <span class="text-lg font-bold">&times;</span>
             </button>
@@ -79,7 +80,8 @@
                 oninput="filterTable()"
             />
         </div>
-        <h3 class="text-lg font-semibold mb-2">Registros Asignados</h3>
+        
+        <h3 class="text-lg font-semibold mb-2">Registros Asignados</h3>   
         
         <!-- AQUI va el scroll -->
         <div class="overflow-y-auto max-h-96 border border-gray-300 rounded">

@@ -16,6 +16,7 @@ function loadDispatches() {
                     <td class="border border-gray-300 px-4 py-2">${dispatch.transport_company_ruc}</td>
                     <td class="border border-gray-300 px-4 py-2">
                         <button class="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600" onclick="openAssignModal(${dispatch.id})">Ver Registros</button>
+                        <button class="bg-orange-500 text-white px-2 py-1 rounded hover:bg-green-600" onclick="loadAssignedEntriesPDF(${dispatch.id }, '${dispatch.dispatch_date}')">Exportar PDF</button>
                     </td>
                 `;
                 tableBody.appendChild(row);
@@ -260,4 +261,63 @@ function filterTable() {
             row.style.display = 'none'; // Ocultar la fila
         }
     });
+}
+
+function loadAssignedEntriesPDF(dispatchId, dispatchDate) {
+    fetch(`/api/dispatches/${dispatchId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (!data.merchandise_entries || data.merchandise_entries.length === 0) {
+                alert("No hay registros asignados para este despacho.");
+                return;
+            }
+
+            // Ordenar los registros por zona
+            const sortedEntries = data.merchandise_entries.sort((a, b) => {
+                const zoneA = a.client_address.zone.toLowerCase();
+                const zoneB = b.client_address.zone.toLowerCase();
+                if (zoneA < zoneB) return -1;
+                if (zoneA > zoneB) return 1;
+                return 0; // Si las zonas son iguales, no cambiar el orden
+            });
+
+            // Crea un nuevo documento PDF
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            // Título
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(16);
+            doc.text("Despacho de mercadería", 105, 20, null, null, "center");
+
+            // Configura la tabla
+            const headers = ["Fecha de Recepción", "Número de Guía", "Proveedor", "Cliente", "Zona", "Peso Total (kg)"];
+            const rows = data.merchandise_entries.map(entry => [
+                entry.reception_date,
+                entry.guide_number,
+                entry.supplier.business_name,
+                entry.client.business_name,
+                entry.client_address.zone,
+                `${entry.total_weight} kg`
+            ]);
+
+            // Establece las columnas y las filas en el PDF
+            doc.autoTable({
+                head: [headers],
+                body: rows,
+                startY: 30, // Y-coordinate of the start of the table
+                theme: 'grid', // Estilo de tabla
+                headStyles: { fillColor: [100, 100, 100] }, // Color de fondo de los encabezados
+            });
+
+            // Formatear la fecha del despacho para usarla en el nombre del archivo
+            const formattedDate = dispatchDate.replace(/-/g, '_'); // Reemplazar guiones por guiones bajos
+
+
+            // Genera el archivo PDF y lo abre en una nueva ventana
+            doc.save(`despacho_${formattedDate}.pdf`);
+        })
+        .catch(error => {
+            console.error("Error al cargar los registros asignados:", error);
+        });
 }

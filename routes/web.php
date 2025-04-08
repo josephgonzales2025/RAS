@@ -15,3 +15,4 @@ Route::get('/partials/{section}', function ($section) {
 
     return response()->json(['error' => 'Sección no encontrada'], 404);
 });
+
