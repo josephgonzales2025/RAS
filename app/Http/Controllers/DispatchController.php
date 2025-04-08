@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Dispatch;
 use App\Models\MerchandiseEntry;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class DispatchController
 {
@@ -70,24 +71,38 @@ class DispatchController
      */
     public function removeMerchandiseEntry(Dispatch $dispatch, MerchandiseEntry $merchandiseEntry)
     {
+        DB::beginTransaction(); // Inicia transacción explícita para PostgreSQL
+
         try {
+            // Verifica relación (con carga eager para eficiencia)
             if ($merchandiseEntry->dispatch_id !== $dispatch->id) {
-                return response()->json(['message' => 'La entrada de mercancía no pertenece a este despacho'], 400);
+                return response()->json([
+                    'message' => 'La entrada de mercancía no pertenece a este despacho'
+                ], 400);
             }
 
-            $merchandiseEntry->update([
+            // Actualiza con condiciones atómicas
+            $updated = $merchandiseEntry->update([
                 'dispatch_id' => null,
-                'status' => 'pending',
+                'status' => 'Pending', // ¡Asegúrate que coincida exactamente con el ENUM!
             ]);
+
+            if (!$updated) {
+                throw new \Exception("No se pudo actualizar la entrada de mercancía");
+            }
+
+            DB::commit(); // Confirma cambios si todo va bien
 
             return response()->json([
                 'message' => 'Entrada de mercancía eliminada del despacho con éxito',
-                'merchandiseEntry' => $merchandiseEntry,
+                'merchandiseEntry' => $merchandiseEntry->fresh(), // Devuelve datos actualizados
             ]);
 
         } catch (\Exception $e) {
+            DB::rollBack(); // Revierte cambios en caso de error
+            
             return response()->json([
-                'message' => 'Error interno del servidor',
+                'message' => 'Error al desvincular la entrada de mercancía',
                 'error' => $e->getMessage()
             ], 500);
         }
