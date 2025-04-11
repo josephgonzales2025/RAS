@@ -13,15 +13,6 @@
         </div>
     </div>
 
-    {{-- Filtro por zonas --}}
-    <div class="mb-4">
-        <label for="zoneFilter" class="block text-sm font-medium text-gray-700 mb-2">Filtrar por Zona:</label>
-        <select id="zoneFilter" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 text-lg bg-white h-12 pl-3">
-            <option value="">Todas las Zonas</option>
-            <!-- Opciones cargadas dinámicamente -->
-        </select>
-    </div>
-
     {{-- Tabla resumida --}}
     <div class="bg-white p-4 rounded shadow">
         <h2 class="text-lg font-bold mb-4">Entradas por Zona</h2>

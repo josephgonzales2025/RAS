@@ -9,6 +9,7 @@ document.addEventListener("DOMContentLoaded", function () {
         placeholder: "Seleccione un cliente",
         allowClear: true
     });
+
 });
 
 function validateNumericInput(input) {
@@ -249,8 +250,15 @@ function loadClientsForModal() {
 
 function loadClientAddressesForModal(clientId) {
     return new Promise((resolve, reject) => {
+        const addressSelect = document.getElementById("edit_client_address_id");
+        addressSelect.innerHTML = ""; // Limpia las opciones existentes
+
         if (!clientId) {
             console.error("No se seleccionó un cliente.");
+            const option = document.createElement("option");
+            option.value = "";
+            option.textContent = "Seleccione un cliente primero";
+            addressSelect.appendChild(option);
             reject("No se seleccionó un cliente.");
             return;
         }
@@ -263,9 +271,6 @@ function loadClientAddressesForModal(clientId) {
                 return response.json();
             })
             .then(data => {
-                const addressSelect = document.getElementById("edit_client_address_id");
-                addressSelect.innerHTML = ""; // Limpia las opciones existentes
-
                 if (data.length === 0) {
                     const option = document.createElement("option");
                     option.value = "";
@@ -292,25 +297,12 @@ function loadClientAddressesForModal(clientId) {
 }
 
 function openEditModal(entryId) {
-    // Mostrar el modal
     const modal = document.getElementById("editModal");
     modal.classList.remove("hidden");
 
-    // Guardar el ID de la entrada en el formulario
     const form = document.getElementById("editMerchandiseEntryForm");
     form.dataset.entryId = entryId;
 
-    // Eliminar cualquier evento `submit` previo para evitar duplicados
-    form.onsubmit = function (event) {
-        event.preventDefault(); // Evita el comportamiento predeterminado del formulario
-
-        const formData = new FormData(form);
-
-        // Llamar a la función para actualizar la entrada
-        updateMerchandiseEntry(entryId, formData);
-    };
-
-    // Obtener los datos de la entrada de mercancía desde la API
     fetch(`/api/merchandise-entries/${entryId}`)
         .then(response => {
             if (!response.ok) {
@@ -319,20 +311,31 @@ function openEditModal(entryId) {
             return response.json();
         })
         .then(entry => {
-            // Llenar el formulario con los datos de la entrada
             document.getElementById("edit_reception_date").value = entry.reception_date;
             document.getElementById("edit_guide_number").value = entry.guide_number;
 
-            // Cargar proveedores y clientes antes de asignar los valores
             Promise.all([loadSuppliersForModal(), loadClientsForModal()]).then(() => {
                 document.getElementById("edit_supplier_id").value = entry.supplier_id;
                 document.getElementById("edit_client_id").value = entry.client_id;
 
-                // Cargar las direcciones del cliente y seleccionar la correcta
+                // Cargar las direcciones del cliente seleccionado
                 loadClientAddressesForModal(entry.client_id).then(() => {
                     document.getElementById("edit_client_address_id").value = entry.client_address_id;
                 }).catch(error => {
                     console.error("Error al cargar las direcciones del cliente para el modal:", error);
+                });
+
+                // Agregar el evento change al combobox de cliente
+                const clientSelect = document.getElementById("edit_client_id");
+                clientSelect.addEventListener("change", function () {
+                    const clientId = this.value; // Obtén el ID del cliente seleccionado
+                    loadClientAddressesForModal(clientId)
+                        .then(() => {
+                            console.log("Direcciones cargadas correctamente.");
+                        })
+                        .catch(error => {
+                            console.error("Error al cargar las direcciones del cliente:", error);
+                        });
                 });
             });
 

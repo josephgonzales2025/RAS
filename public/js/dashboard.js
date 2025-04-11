@@ -8,37 +8,29 @@ function initializeDashboard() {
         fetch('/api/merchandise-entries')
             .then(response => response.json())
             .then(data => {
-                const selectedZone = zoneFilter.value;
                 let totalWeight = 0;
                 let totalFreight = 0;
-
-                // Filtrar y procesar los datos
-                const filteredData = data.filter(entry => {
-                    if (selectedZone && entry.client_address && entry.client_address.zone !== selectedZone) {
-                        return false;
-                    }
-                    totalWeight += parseFloat(entry.total_weight);
-                    totalFreight += parseFloat(entry.total_freight);
-                    return true;
-                });
-
-                // Actualizar el resumen
-                totalWeightElement.textContent = `${totalWeight.toFixed(2)} kg`;
-                totalFreightElement.textContent = `${totalFreight.toFixed(2)}`;
-
-                // Actualizar la tabla
-                dashboardTableBody.innerHTML = "";
+    
+                // Procesar los datos
                 const zones = {};
-
-                filteredData.forEach(entry => {
+                data.forEach(entry => {
                     const zone = entry.client_address ? entry.client_address.zone : "Sin Zona";
                     if (!zones[zone]) {
                         zones[zone] = { totalWeight: 0, totalFreight: 0 };
                     }
                     zones[zone].totalWeight += parseFloat(entry.total_weight);
                     zones[zone].totalFreight += parseFloat(entry.total_freight);
+    
+                    totalWeight += parseFloat(entry.total_weight);
+                    totalFreight += parseFloat(entry.total_freight);
                 });
-
+    
+                // Actualizar el resumen
+                totalWeightElement.textContent = `${totalWeight.toFixed(2)} kg`;
+                totalFreightElement.textContent = `${totalFreight.toFixed(2)}`;
+    
+                // Actualizar la tabla
+                dashboardTableBody.innerHTML = "";
                 Object.keys(zones).forEach(zone => {
                     const row = document.createElement("tr");
                     row.innerHTML = `
@@ -50,27 +42,6 @@ function initializeDashboard() {
                 });
             })
             .catch(error => console.error("Error al cargar los datos del dashboard:", error));
-    }
-
-    function loadZones() {
-        const zoneFilter = document.getElementById("zoneFilter");
-    
-        // Llama a la API para obtener las zonas
-        fetch('/api/zones')
-            .then(response => response.json())
-            .then(zones => {
-                // Limpia las opciones existentes (excepto "Todas las Zonas")
-                zoneFilter.innerHTML = '<option value="">Todas las Zonas</option>';
-    
-                // Agrega las zonas al <select>
-                zones.forEach(zone => {
-                    const option = document.createElement('option');
-                    option.value = zone;
-                    option.textContent = zone;
-                    zoneFilter.appendChild(option);
-                });
-            })
-            .catch(error => console.error('Error al cargar las zonas:', error));
     }
 
     function loadDispatches() {
@@ -119,11 +90,6 @@ function initializeDashboard() {
             .catch(error => console.error('Error al cargar los clientes:', error));
     }
 
-    
-
-    // Cargar las zonas al inicio
-    loadZones();
-
     // Cargar los datos al inicio
     loadDashboardData();
 
@@ -132,9 +98,6 @@ function initializeDashboard() {
 
     // Cargar los totales segun despacho
     fetchDispatchTotals();
-
-    // Recargar los datos cuando se cambie el filtro
-    zoneFilter.addEventListener("change", loadDashboardData);
 
     // Ejecutar loadDispatchClients solo cuando cambie el despacho
     document.getElementById('dispatchFilter').addEventListener('change', () => {
