@@ -54,7 +54,6 @@
                             }
                             
                             if (section === "clientes") {
-                                console.log("Inicializando clientes...");
                                 initializeClientes(); // Llama a la función para inicializar la vista de clientes
                             }
                             if (section === "proveedores") {
@@ -128,7 +127,6 @@
         }
 
         function initializeDespachos() {
-            console.log("Inicializando la vista de despachos...");
 
             // Cargar los despachos en la tabla
             loadDispatches();

@@ -59,13 +59,12 @@ class MerchandiseEntryController
             'guide_number' => 'sometimes|string|max:50',
             'supplier_id' => 'sometimes|exists:suppliers,id',
             'client_id' => 'sometimes|exists:clients,id',
-            'address_id' => 'sometimes|exists:client_addresses,id',
+            'client_address_id' => 'sometimes|exists:client_addresses,id',
             'total_weight' => 'sometimes|numeric|min:0',
             'total_freight' => 'sometimes|numeric|min:0'
         ]);
 
         $merchandiseEntry->update($validated);
-
         $merchandiseEntry->save();
 
         return response()->json(['message' => 'Merchandise entry updated successfully', 'entry' => $merchandiseEntry]);

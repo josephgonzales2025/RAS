@@ -9,7 +9,6 @@ document.addEventListener("DOMContentLoaded", function () {
         placeholder: "Seleccione un cliente",
         allowClear: true
     });
-
 });
 
 function validateNumericInput(input) {
@@ -303,6 +302,21 @@ function openEditModal(entryId) {
     const form = document.getElementById("editMerchandiseEntryForm");
     form.dataset.entryId = entryId;
 
+    // Registrar el evento submit si aún no está registrado
+    if (!form.dataset.eventRegistered) {
+        form.addEventListener("submit", function (event) {
+            event.preventDefault(); // Evita que la página se recargue
+
+            const entryId = this.dataset.entryId; // Obtén el ID de la entrada desde el atributo data
+            const formData = new FormData(this); // Obtén los datos del formulario
+
+            // Llama a la función para actualizar la entrada
+            updateMerchandiseEntry(entryId, formData);
+        });
+
+        form.dataset.eventRegistered = true; // Marca el evento como registrado
+    }
+
     fetch(`/api/merchandise-entries/${entryId}`)
         .then(response => {
             if (!response.ok) {
@@ -329,13 +343,7 @@ function openEditModal(entryId) {
                 const clientSelect = document.getElementById("edit_client_id");
                 clientSelect.addEventListener("change", function () {
                     const clientId = this.value; // Obtén el ID del cliente seleccionado
-                    loadClientAddressesForModal(clientId)
-                        .then(() => {
-                            console.log("Direcciones cargadas correctamente.");
-                        })
-                        .catch(error => {
-                            console.error("Error al cargar las direcciones del cliente:", error);
-                        });
+                    loadClientAddressesForModal(clientId);
                 });
             });
 
@@ -374,7 +382,6 @@ function updateMerchandiseEntry(entryId, formData) {
             return response.json();
         })
         .then(result => {
-            console.log("Entrada de mercancía actualizada con éxito:", result);
 
             // Actualizar la tabla de entradas de mercancía
             loadMerchandiseEntries();
