@@ -36,17 +36,19 @@
 <!-- Listado de Clientes desde API -->
 <div class="bg-white p-4 rounded shadow">
     <h2 class="text-xl font-bold mb-4">Lista de Clientes</h2>
-    <table id="clientsTable" class="w-full border-collapse border border-gray-300">
-        <thead>
-            <tr class="bg-gray-200">
-                <th class="border p-2">ID</th>
-                <th class="border p-2">RUC/DNI</th>
-                <th class="border p-2">Razón Social</th>
-                <th class="border p-2">Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Aquí se llenarán los clientes dinámicamente -->
-        </tbody>
-    </table>
+    <div class="overflow-x-auto">
+        <table id="clientsTable" class="w-full border-collapse border border-gray-300">
+            <thead>
+                <tr class="bg-gray-200">
+                    <th class="border p-2">ID</th>
+                    <th class="border p-2">RUC/DNI</th>
+                    <th class="border p-2">Razón Social</th>
+                    <th class="border p-2">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Aquí se llenarán los clientes dinámicamente -->
+            </tbody>
+        </table>
+    </div>
 </div>

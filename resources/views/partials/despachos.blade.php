@@ -34,27 +34,30 @@
     <!-- Tabla para listar los despachos -->
     <div class="bg-white shadow-md rounded p-4">
         <h2 class="text-xl font-semibold mb-4">Lista de Despachos</h2>
-        <table class="min-w-full table-auto border-collapse border border-gray-300">
-            <thead>
-                <tr class="bg-gray-100">
-                    <th class="border border-gray-300 px-4 py-2">ID</th>
-                    <th class="border border-gray-300 px-4 py-2">Fecha del Despacho</th>
-                    <th class="border border-gray-300 px-4 py-2">Chofer</th>
-                    <th class="border border-gray-300 px-4 py-2">Empresa de Transporte</th>
-                    <th class="border border-gray-300 px-4 py-2">RUC</th>
-                    <th class="border border-gray-300 px-4 py-2">Acciones</th>
-                </tr>
-            </thead>
-            <tbody id="dispatchTableBody">
-                <!-- Aquí se cargarán los despachos dinámicamente -->
-            </tbody>
-        </table>
+        <div class="overflow-x-auto">
+            <table class="min-w-full table-auto border-collapse border border-gray-300">
+                <thead>
+                    <tr class="bg-gray-100">
+                        <th class="border border-gray-300 px-4 py-2">ID</th>
+                        <th class="border border-gray-300 px-4 py-2">Fecha del Despacho</th>
+                        <th class="border border-gray-300 px-4 py-2">Chofer</th>
+                        <th class="border border-gray-300 px-4 py-2">Empresa de Transporte</th>
+                        <th class="border border-gray-300 px-4 py-2">RUC</th>
+                        <th class="border border-gray-300 px-4 py-2">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="dispatchTableBody">
+                    <!-- Aquí se cargarán los despachos dinámicamente -->
+                </tbody>
+            </table>
+        </div>
+        
     </div>
 </div>
 
 <!-- Modal para asignar registros -->
 <div id="assignModal" class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center hidden">
-    <div class="bg-white rounded-lg shadow-lg w-3/4 p-6">
+    <div class="bg-white rounded-lg shadow-lg w-full max-w-[90%] md:max-w-[75%] lg:max-w-[50%] p-6 overflow-y-auto max-h-[90vh]">
         <div class="flex justify-between items-center mb-4">
             <h2 class="text-xl font-semibold">Asignar Registros al Despacho</h2>
             
