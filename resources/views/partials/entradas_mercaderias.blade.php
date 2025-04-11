@@ -90,7 +90,7 @@
 
 {{-- Modal para asignar registros al despacho --}}
 <div id="assignToDispatchModal" class="hidden fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
-    <div class="bg-white p-6 rounded shadow-lg w-1/3">
+    <div class="bg-white p-6 rounded shadow-lg w-full max-w-[90%] md:max-w-[50%] lg:max-w-[30%] overflow-y-auto max-h-[90vh]"">
         <h2 class="text-xl font-bold mb-4">Asignar al Despacho</h2>
         <div class="mb-4">
             <label for="dispatchSelect" class="block font-bold">Seleccionar Despacho</label>
