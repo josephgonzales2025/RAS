@@ -1,3 +1,30 @@
 input[type="text"], select {
     text-transform: uppercase;
 }
+
+/* @media (max-width: 640px) {
+    table {
+        display: block;
+    }
+    thead {
+        display: none;
+    }
+    tbody tr {
+        display: block;
+        margin-bottom: 1rem;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        background-color: #fff;
+    }
+    tbody td {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+    }
+    tbody td::before {
+        content: attr(data-label);
+        font-weight: bold;
+        color: #4b5563;
+    }
+} */

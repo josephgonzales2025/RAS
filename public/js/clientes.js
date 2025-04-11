@@ -31,9 +31,11 @@ function appendClientRow(client) {
         <td class='border p-2'>${client.ruc_dni}</td>
         <td class='border p-2'>${client.business_name}</td>
         <td class='border p-2'>
-            <a href="#" class="bg-blue-700 text-white p-1 rounded" onclick="editClient(${client.id}, '${client.ruc_dni}', '${client.business_name.replace(/'/g, "\\'")}')">Editar</a> |
-            <button class="bg-green-700 text-white p-1 rounded" onclick="showAddressForm(${client.id})">Añadir Dirección</button>
-            <button class="bg-purple-700 text-white p-1 rounded" onclick="loadAddresses(${client.id})">Ver Direcciones</button>
+            <div class="flex flex-col sm:flex-row gap-2">
+                <button class="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600" onclick="editClient(${client.id}, '${client.ruc_dni}', '${client.business_name.replace(/'/g, "\\'")}')">Editar</button>
+                <button class="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600" onclick="showAddressForm(${client.id})">Añadir Dirección</button>
+                <button class="bg-purple-500 text-white px-2 py-1 rounded hover:bg-purple-600" onclick="loadAddresses(${client.id})">Ver Direcciones</button>
+            </div>
             <div id="addressForm-${client.id}" class="hidden mt-2">
                 <input type="text" id="address-${client.id}" placeholder="Dirección" class="border p-1">
                 <input type="text" id="zone-${client.id}" placeholder="Zona" class="border p-1">

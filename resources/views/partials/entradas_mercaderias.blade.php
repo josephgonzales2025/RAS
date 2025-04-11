@@ -65,25 +65,27 @@
         <h2 class="text-xl font-bold">Lista de Entradas de Mercancía</h2>
         <button id="assignToDispatchButton" class="bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-800" onclick="openAssignToDispatchModal()">Asignar al despacho</button>
     </div>
-    <table id="merchandiseEntriesTable" class="w-full border-collapse border border-gray-300">
-        <thead>
-            <tr class="bg-gray-200">
-                <th class="border p-2 min-w-[50px]">Fecha de Recepción</th>
-                <th class="border p-2">Número de Guía</th>
-                <th class="border p-2 min-w-[300px]">Proveedor</th>
-                <th class="border p-2 min-w-[300px]">Cliente</th>
-                <th class="border p-2">Dirección del Cliente</th>
-                <th class="border p-2 min-w-[200px]">Zona</th>
-                <th class="border p-2 min-w-[80px]">Peso Total</th>
-                <th class="border p-2">Flete Total</th>
-                <th class="border p-2">Acciones</th>
-                <th class="border p-2"><input type="checkbox" id="selectAllCheckbox" onclick="toggleSelectAll(this)"></th>
-            </tr>
-        </thead>
-        <tbody>
-            {{-- Filas dinámicas cargadas desde la API --}}
-        </tbody>
-    </table>
+    <div class="overflow-x-auto"> <!-- Contenedor para hacer la tabla desplazable -->
+        <table id="merchandiseEntriesTable" class="w-full border-collapse border border-gray-300">
+            <thead>
+                <tr class="bg-gray-200">
+                    <th class="border p-2 min-w-[50px]">Fecha de Recepción</th>
+                    <th class="border p-2">Número de Guía</th>
+                    <th class="border p-2 min-w-[300px]">Proveedor</th>
+                    <th class="border p-2 min-w-[300px]">Cliente</th>
+                    <th class="border p-2">Dirección del Cliente</th>
+                    <th class="border p-2 min-w-[200px]">Zona</th>
+                    <th class="border p-2 min-w-[80px]">Peso Total</th>
+                    <th class="border p-2">Flete Total</th>
+                    <th class="border p-2">Acciones</th>
+                    <th class="border p-2"><input type="checkbox" id="selectAllCheckbox" onclick="toggleSelectAll(this)"></th>
+                </tr>
+            </thead>
+            <tbody>
+                {{-- Filas dinámicas cargadas desde la API --}}
+            </tbody>
+        </table>
+    </div>
 </div>
 
 {{-- Modal para asignar registros al despacho --}}

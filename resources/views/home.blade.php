@@ -3,9 +3,11 @@
 @section('title', 'Sistema RAS')
 
 @section('content')
-    <div id="mainContent">
-        <h1 class="text-2xl font-bold mb-4">Bienvenido</h1>
-        <p>Selecciona una opción del menú para comenzar.</p>
+    <div id="mainContent" class="p-4 bg-white rounded shadow">
+        <h1 class="text-2xl font-bold mb-4 text-center sm:text-left">Bienvenido</h1>
+        <p class="text-gray-700 text-center sm:text-left">
+            Selecciona una opción del menú para comenzar.
+        </p>
     </div>
 @endsection
 
