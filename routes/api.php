@@ -24,3 +24,4 @@ Route::post('/dispatches/{dispatch}/assign', [DispatchController::class, 'assign
 Route::delete('/dispatches/{dispatch}/remove/{merchandiseEntry}', [DispatchController::class, 'removeMerchandiseEntry']);
 Route::get('/dispatches/{dispatchId}/totals', [DispatchController::class, 'getDispatchTotals']);
 Route::get('/dispatches/{dispatchId}/clients', [DispatchController::class, 'getDispatchClients']);
+Route::post('/dispatches/{dispatch}/assign-bulk', [DispatchController::class, 'assignBulk']);

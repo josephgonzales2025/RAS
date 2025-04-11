@@ -54,9 +54,17 @@
     />
 </div>
 
+{{-- Botón para asignar registros al despacho --}}
+<div class="mb-4">
+    
+</div>
+
 {{-- Tabla para listar las entradas de mercancía --}}
 <div class="bg-white p-4 rounded shadow">
-    <h2 class="text-xl font-bold mb-4">Lista de Entradas de Mercancía</h2>
+    <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-bold">Lista de Entradas de Mercancía</h2>
+        <button id="assignToDispatchButton" class="bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-800" onclick="openAssignToDispatchModal()">Asignar al despacho</button>
+    </div>
     <table id="merchandiseEntriesTable" class="w-full border-collapse border border-gray-300">
         <thead>
             <tr class="bg-gray-200">
@@ -69,12 +77,30 @@
                 <th class="border p-2 min-w-[80px]">Peso Total</th>
                 <th class="border p-2">Flete Total</th>
                 <th class="border p-2">Acciones</th>
+                <th class="border p-2"><input type="checkbox" id="selectAllCheckbox" onclick="toggleSelectAll(this)"></th>
             </tr>
         </thead>
         <tbody>
             {{-- Filas dinámicas cargadas desde la API --}}
         </tbody>
     </table>
+</div>
+
+{{-- Modal para asignar registros al despacho --}}
+<div id="assignToDispatchModal" class="hidden fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
+    <div class="bg-white p-6 rounded shadow-lg w-1/3">
+        <h2 class="text-xl font-bold mb-4">Asignar al Despacho</h2>
+        <div class="mb-4">
+            <label for="dispatchSelect" class="block font-bold">Seleccionar Despacho</label>
+            <select id="dispatchSelect" class="w-full border rounded p-2">
+                {{-- Opciones dinámicas cargadas desde la API --}}
+            </select>
+        </div>
+        <div class="flex justify-end">
+            <button class="bg-gray-500 text-white px-4 py-2 rounded mr-2" onclick="closeAssignToDispatchModal()">Cancelar</button>
+            <button class="bg-blue-500 text-white px-4 py-2 rounded" onclick="assignSelectedEntriesToDispatch()">Asignar</button>
+        </div>
+    </div>
 </div>
 
 <!-- Modal para editar entrada de mercancía -->

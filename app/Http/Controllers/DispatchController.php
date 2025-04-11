@@ -141,4 +141,21 @@ class DispatchController
             return response()->json(['error' => 'Error al obtener los clientes'], 500);
         }
     }
+
+    public function assignBulk(Request $request, Dispatch $dispatch)
+    {
+        $validated = $request->validate([
+            'merchandise_entry_ids' => 'required|array',
+            'merchandise_entry_ids.*' => 'exists:merchandise_entries,id',
+        ]);
+
+        // Asignar las entradas al despacho
+        MerchandiseEntry::whereIn('id', $validated['merchandise_entry_ids'])->update([
+            'dispatch_id' => $dispatch->id,
+            'status' => 'Dispatched', // Actualiza el estado a 'dispatched'
+        ]);
+
+        return response()->json(['message' => 'Registros asignados con éxito.']);
+    }
+    
 }

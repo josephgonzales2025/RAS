@@ -135,12 +135,22 @@ function loadMerchandiseEntries() {
                             <button class="bg-orange-500 text-white p-1 rounded" onclick="openProductModal(${entry.id})">Ver Productos</button>
                         </div>
                     </td>
+                    <td class="border p-2">
+                        <input type="checkbox" class="entryCheckbox" value="${entry.id}">
+                    </td>
                 `;
                 tableBody.appendChild(row);
             });
             
         })
         .catch(error => console.error('Error al cargar las entradas de mercancía:', error));
+}
+
+function toggleSelectAll(selectAllCheckbox) {
+    const checkboxes = document.querySelectorAll(".entryCheckbox");
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = selectAllCheckbox.checked;
+    });
 }
 
 function addMerchandiseEntry() {
@@ -621,4 +631,57 @@ function filterTableM() {
             row.style.display = 'none'; // Ocultar la fila
         }
     });
+}
+
+function openAssignToDispatchModal() {
+    const modal = document.getElementById("assignToDispatchModal");
+    modal.classList.remove("hidden");
+
+    // Cargar los despachos disponibles
+    fetch('/api/dispatches?status=available')
+        .then(response => response.json())
+        .then(data => {
+            const dispatchSelect = document.getElementById("dispatchSelect");
+            dispatchSelect.innerHTML = ""; // Limpia las opciones existentes
+
+            data.forEach(dispatch => {
+                const option = document.createElement("option");
+                option.value = dispatch.id;
+                option.textContent = `${dispatch.dispatch_date} - ${dispatch.driver_name}`;
+                dispatchSelect.appendChild(option);
+            });
+        })
+        .catch(error => console.error('Error al cargar los despachos:', error));
+}
+
+function closeAssignToDispatchModal() {
+    const modal = document.getElementById("assignToDispatchModal");
+    modal.classList.add("hidden");
+}
+
+function assignSelectedEntriesToDispatch() {
+    const selectedEntries = Array.from(document.querySelectorAll(".entryCheckbox:checked"))
+        .map(checkbox => checkbox.value);
+
+    if (selectedEntries.length === 0) {
+        alert("Por favor, seleccione al menos un registro.");
+        return;
+    }
+
+    const dispatchId = document.getElementById("dispatchSelect").value;
+
+    fetch(`/api/dispatches/${dispatchId}/assign-bulk`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ merchandise_entry_ids: selectedEntries }),
+    })
+        .then(response => response.json())
+        .then(data => {
+            alert("Registros asignados con éxito.");
+            closeAssignToDispatchModal();
+            loadMerchandiseEntries(); // Recargar la tabla de recepción
+        })
+        .catch(error => console.error('Error al asignar los registros:', error));
 }
