@@ -2,32 +2,32 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreSupplierRequest;
+use App\Http\Requests\UpdateSupplierRequest;
 use App\Models\Supplier;
-use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 
 class SupplierController
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index() : JsonResponse
     {
-        return response()->json(Supplier::all());
+        $suplliers = Supplier::all();
+        return new JsonResponse($suplliers);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreSupplierRequest $request) : JsonResponse
     {
-        $validated = $request->validate([
-            'ruc_dni' => 'required|string|max:11|unique:suppliers',
-            'business_name' => 'required|string|max:255',
-        ]);
+        $validated = $request->validated();
 
         $supplier = Supplier::create($validated);
 
-        return response()->json($supplier, 201);
+        return new JsonResponse($supplier, 201);
     }
 
     /**
@@ -41,25 +41,27 @@ class SupplierController
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Supplier $supplier)
+    public function update(UpdateSupplierRequest $request, Supplier $supplier) : JsonResponse
     {
-        $validated = $request->validate([
-            'ruc_dni' => 'sometimes|required|string|max:11|unique:suppliers,ruc_dni,' . $supplier->id,
-            'business_name' => 'sometimes|required|string|max:255',
-        ]);
+        $validated = $request->validated();
 
         $supplier->update($validated);
 
-        return response()->json(['message' => 'Supplier updated successfully', 'supplier' => $supplier]);
+        return new JsonResponse([
+            'message' => 'Supplier updated successfully',
+            'supplier' => $supplier
+        ]);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Supplier $supplier)
+    public function destroy(Supplier $supplier) : JsonResponse
     {
         $supplier->delete();
 
-        return response()->json(['message' => 'Supplier deleted successfully']);
+        return new JsonResponse([
+            'message' => 'Supplier deleted successfully'
+        ]);
     }
 }

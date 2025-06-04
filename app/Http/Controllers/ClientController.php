@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreClientRequest;
 use App\Models\Client;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+
+use function PHPUnit\Framework\isEmpty;
 
 class ClientController
 {
@@ -12,30 +16,35 @@ class ClientController
      */
     public function index()
     {
-        return Client::with('addresses')->get();
+        return Client::with('addresses')->paginate(15);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreClientRequest $request) : JsonResponse
     {
-        $request->validate([
-            'ruc_dni' => 'required|string|unique:clients,ruc_dni',
-            'business_name' => 'required|string|max:255',
-        ]);
+        $validated = $request->validated();
 
-        $client = Client::create($request->only(['ruc_dni', 'business_name']));
+        $client = Client::create($validated);
 
-        return response()->json($client, 201);
+        return new JsonResponse([
+            'message' => 'Client created successfully',
+            'client' => $client
+        ], 201);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Client $client)
+    public function show($id) : JsonResponse
     {
-        return $client->load('addresses');
+        $client = Client::find($id);
+        if($client.isEmpty()){
+            return new JsonResponse(['message' => 'Client not found']);
+        }
+        $client->load('addresses');
+        return new JsonResponse($client);
     }
 
     /**
