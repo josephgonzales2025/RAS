@@ -16,7 +16,7 @@ class ClientController
      */
     public function index()
     {
-        return Client::with('addresses')->paginate(15);
+        return Client::with('addresses')->get();
     }
 
     /**
