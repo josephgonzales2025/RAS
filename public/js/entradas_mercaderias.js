@@ -1,62 +1,31 @@
 document.addEventListener("DOMContentLoaded", function () {
-    // Inicializa Select2 en los campos de proveedor y cliente
-    $('#supplier_id').select2({
-        placeholder: "Seleccione un proveedor",
-        allowClear: true,
-        dropdownParent: $('#entryModal')
-    });
-
-    $('#client_id').select2({
-        placeholder: "Seleccione un cliente",
-        allowClear: true,
-        dropdownParent: $('#entryModal')
-    });
-    
-    // Cargar datos iniciales
-    loadSuppliersM();
-    loadClientsM();
-    loadMerchandiseEntries(); // Cargar la tabla de entradas
-    loadMerchandiseEntriesTable(); // Cargar la tabla de entradas de mercancía
-    
-    // El setupEntryModal() ahora se llama desde initializeEntradas_Mercaderias() después del contenido AJAX
-    
-    // Estos event listeners se configuran en initializeEntradas_Mercaderias() para evitar duplicación
-    // Configurar evento de cambio de cliente para cargar direcciones
-    // $('#client_id').on('change', function() {
-    //     loadClientAddresses();
-    // });
-    
-    // Configurar envío del formulario
-    // $('#addMerchandiseEntryForm').on('submit', function(e) {
-    //     e.preventDefault();
-    //     submitEntryForm();
-    // });
-    
-    // Configurar búsqueda en la tabla
-    $('#searchInput').on('keyup', function() {
-        const searchTerm = $(this).val().toLowerCase();
-        const rows = $('.merchandise-entries-table tbody tr');
-        
-        rows.each(function() {
-            const rowText = $(this).text().toLowerCase();
-            $(this).toggle(rowText.indexOf(searchTerm) > -1);
+    // Inicializa Select2 en los campos de proveedor y cliente solo si existen
+    if ($('#supplier_id').length) {
+        $('#supplier_id').select2({
+            placeholder: "Seleccione un proveedor",
+            allowClear: true
         });
-    });
+    }
+
+    if ($('#client_id').length) {
+        $('#client_id').select2({
+            placeholder: "Seleccione un cliente",
+            allowClear: true
+        });
+    }
 });
 
-// Función para configurar el modal
+// Función para configurar el modal de entrada
 function setupEntryModal() {
+    // Esta función maneja la configuración del modal si existe
+    // Si no existe, simplemente no hace nada para evitar errores
     const modal = document.getElementById('entryModal');
     const openModalBtn = document.getElementById('openEntryModalBtn');
     const closeModalBtn = document.getElementById('closeEntryModalBtn');
     
-    // Verificar que todos los elementos existan antes de configurar eventos
+    // Si no existen los elementos del modal, simplemente retorna sin error
     if (!modal || !openModalBtn || !closeModalBtn) {
-        console.error('Elementos del modal no encontrados:', {
-            modal: !!modal,
-            openModalBtn: !!openModalBtn,
-            closeModalBtn: !!closeModalBtn
-        });
+        console.info('Modal de entrada no encontrado - usando formulario directo');
         return;
     }
     
@@ -92,50 +61,6 @@ function closeEntryModal() {
     if (form) {
         form.reset();
     }
-}
-
-// Función para enviar el formulario
-function submitEntryForm() {
-    // Obtener datos del formulario
-    const formData = {
-        reception_date: document.getElementById('reception_date').value,
-        guide_number: document.getElementById('guide_number').value,
-        supplier_id: document.getElementById('supplier_id').value,
-        client_id: document.getElementById('client_id').value,
-        client_address_id: document.getElementById('client_address_id').value,
-        total_weight: document.getElementById('total_weight').value,
-        total_freight: document.getElementById('total_freight').value
-    };
-    
-    // Enviar datos a la API
-    fetch('/api/merchandise-entries', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-        },
-        body: JSON.stringify(formData)
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Error al guardar la entrada de mercancía');
-        }
-        return response.json();
-    })
-    .then(data => {
-        // Mostrar mensaje de éxito
-        alert('Entrada de mercancía registrada correctamente');
-        
-        // Cerrar modal y recargar datos
-        closeEntryModal();
-        
-        // Recargar la tabla de entradas
-        loadMerchandiseEntries();
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Error al guardar la entrada de mercancía: ' + error.message);
-    });
 }
 
 function validateNumericInput(input) {
@@ -229,93 +154,9 @@ function loadClientAddresses() {
         .catch(error => console.error("Error al cargar direcciones del cliente:", error));
 }
 
-// Función para cargar la tabla de entradas de mercancía
 function loadMerchandiseEntries() {
-    fetch('/api/merchandise-entries')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`Error al cargar entradas de mercancía: ${response.statusText}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            // Obtener la tabla y limpiar su contenido actual
-            const tableBody = document.querySelector('.merchandise-entries-table tbody');
-            if (!tableBody) {
-                console.error('No se encontró el cuerpo de la tabla de entradas de mercancía');
-                return;
-            }
-            
-            tableBody.innerHTML = '';
-            
-            // Si no hay datos, mostrar mensaje
-            if (data.length === 0) {
-                const emptyRow = document.createElement('tr');
-                emptyRow.innerHTML = `<td colspan="7" class="text-center py-4">No hay entradas de mercancía registradas</td>`;
-                tableBody.appendChild(emptyRow);
-                return;
-            }
-            
-            // Agregar filas a la tabla
-            data.forEach(entry => {
-                const row = document.createElement('tr');
-                row.className = 'hover:bg-gray-50';
-                row.innerHTML = `
-                    <td class="px-4 py-3 text-center">${entry.reception_date || '-'}</td>
-                    <td class="px-4 py-3 text-center">${entry.guide_number || '-'}</td>
-                    <td class="px-4 py-3">${entry.supplier_name || '-'}</td>
-                    <td class="px-4 py-3">${entry.client_name || '-'}</td>
-                    <td class="px-4 py-3 text-right">${entry.total_weight ? parseFloat(entry.total_weight).toFixed(2) + ' kg' : '-'}</td>
-                    <td class="px-4 py-3 text-right">${entry.total_freight ? '$' + parseFloat(entry.total_freight).toFixed(2) : '-'}</td>
-                    <td class="px-4 py-3 text-center">
-                        <div class="flex justify-center space-x-2">
-                            <button class="text-blue-600 hover:text-blue-800" onclick="viewEntryDetails(${entry.id})">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                </svg>
-                            </button>
-                            <button class="text-green-600 hover:text-green-800" onclick="editEntry(${entry.id})">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                </svg>
-                            </button>
-                            <button class="text-red-600 hover:text-red-800" onclick="deleteEntry(${entry.id})">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                </svg>
-                            </button>
-                        </div>
-                    </td>
-                `;
-                tableBody.appendChild(row);
-            });
-        })
-        .catch(error => console.error('Error al cargar entradas de mercancía:', error));
-}
-
-// Función para ver detalles de una entrada
-function viewEntryDetails(entryId) {
-    // Implementar la lógica para ver detalles
-    console.log(`Ver detalles de la entrada ${entryId}`);
-}
-
-// Función para editar una entrada
-function editEntry(entryId) {
-    // Implementar la lógica para editar
-    console.log(`Editar entrada ${entryId}`);
-}
-
-// Función para eliminar una entrada
-function deleteEntry(entryId) {
-    if (confirm('¿Está seguro de que desea eliminar esta entrada de mercancía?')) {
-        // Implementar la lógica para eliminar
-        console.log(`Eliminar entrada ${entryId}`);
-    }
-}
-
-function loadMerchandiseEntriesTable() {
     const tableBody = document.querySelector("#merchandiseEntriesTable tbody");
+
     // Verificar si el elemento existe
     if (!tableBody) {
         console.warn("El elemento #merchandiseEntriesTable tbody no existe en el DOM.");
@@ -362,6 +203,11 @@ function toggleSelectAll(selectAllCheckbox) {
     checkboxes.forEach(checkbox => {
         checkbox.checked = selectAllCheckbox.checked;
     });
+}
+
+// Función para enviar el formulario (alias de addMerchandiseEntry)
+function submitEntryForm() {
+    addMerchandiseEntry();
 }
 
 function addMerchandiseEntry() {
