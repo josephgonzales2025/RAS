@@ -12,8 +12,28 @@
 @endsection
 
 @section('scripts')
+    <!-- Font Awesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <!-- Incluye jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
+    <!-- DataTables CSS y JS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap5.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap5.min.css">
+    
+    <script type="text/javascript" src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.bootstrap5.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap5.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
 
     <!-- Incluye Select2 -->
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
@@ -80,9 +100,98 @@
             // Código específico para la vista de clientes
             loadClients();
 
+            // Inicializar el modal de clientes (agregar)
+            document.getElementById("openClientModalBtn").addEventListener("click", function() {
+                openClientModal();
+            });
+
+            document.getElementById("closeClientModalBtn").addEventListener("click", function() {
+                closeClientModal();
+            });
+
             document.getElementById("addClientForm").addEventListener("submit", function (event) {
                 event.preventDefault();
                 addClient();
+            });
+
+            // Inicializar el modal de edición de clientes
+            document.getElementById("closeEditClientModalBtn").addEventListener("click", function() {
+                closeEditClientModal();
+            });
+
+            document.getElementById("cancelEditBtn").addEventListener("click", function() {
+                closeEditClientModal();
+            });
+
+            document.getElementById("editClientForm").addEventListener("submit", function (event) {
+                event.preventDefault();
+                updateClient();
+            });
+
+            // Inicializar el modal de agregar dirección
+            document.getElementById("closeAddAddressModalBtn").addEventListener("click", function() {
+                closeAddAddressModal();
+            });
+
+            document.getElementById("cancelAddAddressBtn").addEventListener("click", function() {
+                closeAddAddressModal();
+            });
+
+            document.getElementById("addAddressForm").addEventListener("submit", function (event) {
+                event.preventDefault();
+                addModalAddress();
+            });
+
+            // Inicializar el modal de ver direcciones
+            document.getElementById("closeViewAddressModalBtn").addEventListener("click", function() {
+                closeViewAddressModal();
+            });
+
+            document.getElementById("closeViewAddressBtn").addEventListener("click", function() {
+                closeViewAddressModal();
+            });
+
+            // Cerrar los modales al hacer clic fuera de ellos
+            document.getElementById("clientModal").addEventListener("click", function(event) {
+                if (event.target === this) {
+                    closeClientModal();
+                }
+            });
+
+            document.getElementById("editClientModal").addEventListener("click", function(event) {
+                if (event.target === this) {
+                    closeEditClientModal();
+                }
+            });
+
+            document.getElementById("addAddressModal").addEventListener("click", function(event) {
+                if (event.target === this) {
+                    closeAddAddressModal();
+                }
+            });
+
+            document.getElementById("viewAddressModal").addEventListener("click", function(event) {
+                if (event.target === this) {
+                    closeViewAddressModal();
+                }
+            });
+
+            // Cerrar modales con tecla Escape
+            document.addEventListener("keydown", function(e) {
+                if (e.key === "Escape") {
+                    if (!document.getElementById("clientModal").classList.contains("hidden")) {
+                        closeClientModal();
+                    }
+                    if (!document.getElementById("editClientModal").classList.contains("hidden")) {
+                        closeEditClientModal();
+                    }
+                    if (!document.getElementById("addAddressModal").classList.contains("hidden")) {
+                        closeAddAddressModal();
+                    }
+                    if (!document.getElementById("viewAddressModal").classList.contains("hidden")) {
+                        closeViewAddressModal();
+                    }
+                }
             });
         }
 
@@ -105,6 +214,9 @@
             loadSuppliersM();
             loadClientsM();
             loadMerchandiseEntries();
+            
+            // Configurar el modal después de que se haya cargado el contenido
+            setupEntryModal();
 
             // Verificar si se debe recargar la tabla
             if (localStorage.getItem('reloadMerchandiseEntries') === 'true') {
@@ -115,7 +227,7 @@
 
             document.getElementById("addMerchandiseEntryForm").addEventListener("submit", function (event) {
                 event.preventDefault();
-                addMerchandiseEntry();
+                submitEntryForm();
             });
 
             document.getElementById("client_id").addEventListener("change", function () {

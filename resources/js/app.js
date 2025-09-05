@@ -1,8 +1,9 @@
-import { createApp } from 'vue';
-import App from './App.vue';
-import router from './router'; // Importa las rutas
+// Archivo JavaScript principal para la aplicación Laravel
+// Esta aplicación no usa Vue.js, solo JavaScript vanilla con jQuery
 
-const app = createApp(App);
-app.use(router); // Usa Vue Router
-app.mount('#app');
+// Importar Bootstrap si es necesario
+import './bootstrap';
+
+// Cualquier configuración global de JavaScript puede ir aquí
+console.log('Aplicación Laravel cargada correctamente');
 

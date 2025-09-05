@@ -16,7 +16,7 @@ function loadDispatches() {
                     <td class="border border-gray-300 px-4 py-2">${dispatch.transport_company_ruc}</td>
                     <td class="border border-gray-300 px-4 py-2">
                         <button class="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600" onclick="openAssignModal(${dispatch.id})">Ver Registros</button>
-                        <button class="bg-orange-500 text-white px-2 py-1 rounded hover:bg-green-600" onclick="loadAssignedEntriesPDF(${dispatch.id }, '${dispatch.dispatch_date}')">Exportar PDF</button>
+                        <button class="bg-orange-500 text-white px-2 py-1 rounded hover:bg-orange-600" onclick="loadAssignedEntriesPDF(${dispatch.id }, '${dispatch.dispatch_date}')">Exportar PDF</button>
                     </td>
                 `;
                 tableBody.appendChild(row);

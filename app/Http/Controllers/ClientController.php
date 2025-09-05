@@ -16,7 +16,7 @@ class ClientController
      */
     public function index()
     {
-        return Client::with('addresses')->get();
+        return Client::with('addresses')->orderBy('business_name', 'asc')->get();
     }
 
     /**
