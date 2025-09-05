@@ -14,8 +14,8 @@ class SupplierController
      */
     public function index() : JsonResponse
     {
-        $suplliers = Supplier::all();
-        return new JsonResponse($suplliers);
+        $suppliers = Supplier::orderBy('business_name', 'asc')->get();
+        return new JsonResponse($suppliers);
     }
 
     /**
