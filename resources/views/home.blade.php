@@ -20,20 +20,12 @@
 
     <!-- DataTables CSS y JS -->
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css">
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap5.min.css">
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap5.min.css">
     
     <script type="text/javascript" src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
-    <script type="text/javascript" src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
-    <script type="text/javascript" src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.bootstrap5.min.js"></script>
-    <script type="text/javascript" src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
-    <script type="text/javascript" src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap5.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
 
     <!-- Incluye Select2 -->
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
@@ -97,6 +89,7 @@
         });
 
         function initializeClientes() {
+            console.log('Inicializando sección de clientes...');
             // Código específico para la vista de clientes
             loadClients();
 
@@ -199,13 +192,57 @@
             // Código específico para la vista de proveedores
             loadSuppliers();
 
-            document.getElementById("addSupplierForm").addEventListener("submit", function (event) {
-                event.preventDefault();
-                addSuppliers();
+            // Inicializar el modal de proveedores (agregar)
+            document.getElementById("openSupplierModalBtn").addEventListener("click", function() {
+                openSupplierModal();
             });
 
-            document.getElementById("searchInput").addEventListener("input", function () {
-                filterSuppliers();
+            document.getElementById("closeSupplierModalBtn").addEventListener("click", function() {
+                closeSupplierModal();
+            });
+
+            document.getElementById("addSupplierForm").addEventListener("submit", function (event) {
+                event.preventDefault();
+                addSupplier();
+            });
+
+            // Inicializar el modal de edición de proveedores
+            document.getElementById("closeEditSupplierModalBtn").addEventListener("click", function() {
+                closeEditSupplierModal();
+            });
+
+            document.getElementById("cancelEditBtn").addEventListener("click", function() {
+                closeEditSupplierModal();
+            });
+
+            document.getElementById("editSupplierForm").addEventListener("submit", function (event) {
+                event.preventDefault();
+                updateSupplier();
+            });
+
+            // Cerrar los modales al hacer clic fuera de ellos
+            document.getElementById("supplierModal").addEventListener("click", function(event) {
+                if (event.target === this) {
+                    closeSupplierModal();
+                }
+            });
+
+            document.getElementById("editSupplierModal").addEventListener("click", function(event) {
+                if (event.target === this) {
+                    closeEditSupplierModal();
+                }
+            });
+
+            // Cerrar modales con tecla Escape
+            document.addEventListener("keydown", function(e) {
+                if (e.key === "Escape") {
+                    if (!document.getElementById("supplierModal").classList.contains("hidden")) {
+                        closeSupplierModal();
+                    }
+                    if (!document.getElementById("editSupplierModal").classList.contains("hidden")) {
+                        closeEditSupplierModal();
+                    }
+                }
             });
         }
 
