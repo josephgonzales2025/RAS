@@ -104,9 +104,6 @@ function initializeClientsDataTable() {
             "order": [[1, 'asc']]
         });
         
-        console.log('DataTable de CLIENTES inicializado correctamente');
-        console.log('Tabla DataTable clientes:', clientsDataTable);
-        
         // Verificar que los elementos de DataTables estén presentes y hacer el input editable
         setTimeout(() => {
             const wrapper = $('#clientsTable_wrapper');
@@ -114,10 +111,6 @@ function initializeClientsDataTable() {
             const pagination = $('#clientsTable_paginate');
             const info = $('#clientsTable_info');
             const length = $('#clientsTable_length');
-            
-            console.log('=== DIAGNÓSTICO CLIENTES ===');
-            console.log('Wrapper encontrado:', wrapper.length > 0 ? 'SÍ' : 'NO');
-            console.log('Campo de búsqueda encontrado:', searchInput.length > 0 ? 'SÍ' : 'NO');
             
             // Forzar que el input de búsqueda sea editable
             if (searchInput.length > 0) {
@@ -133,9 +126,6 @@ function initializeClientsDataTable() {
                 searchInput.attr('placeholder', 'Buscar clientes...'); // Añadir placeholder
                 console.log('Input de búsqueda habilitado para clientes');
             }
-            console.log('Paginación encontrada:', pagination.length > 0 ? 'SÍ' : 'NO');
-            console.log('Info encontrada:', info.length > 0 ? 'SÍ' : 'NO');
-            console.log('Length encontrado:', length.length > 0 ? 'SÍ' : 'NO');
             
             if (searchInput.length === 0) {
                 console.error('No se encontró el campo de búsqueda de DataTables para clientes');
@@ -215,12 +205,9 @@ function addClient() {
         
         // Verificar que tenemos el cliente en la respuesta
         if (data.client) {
-            console.log("Agregando cliente a la tabla:", data.client);
             
             // Opción más simple: recargar toda la tabla para evitar problemas con DataTables
             loadClients();
-            
-            console.log("Tabla recargada con el nuevo cliente");
         } else {
             console.error("No se recibió el objeto client en la respuesta");
             // Si no recibimos el cliente, recargar toda la tabla
@@ -273,19 +260,15 @@ function updateClient() {
         return;
     }
 
-    console.log("Iniciando actualización del cliente:", { id, rucDni, businessName });
-
     fetch(`/api/clients/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ruc_dni: rucDni, business_name: businessName })
     })
     .then(response => {
-        console.log("Response status:", response.status);
         return response.json();
     })
     .then(data => {
-        console.log("Data recibida:", data);
         
         // Mostrar mensaje de éxito
         showSuccessMessage("Cliente actualizado con éxito");
@@ -311,7 +294,6 @@ function updateClient() {
                 row.setAttribute("data-client-name", businessName.toLowerCase());
             }
             
-            console.log("Celdas actualizadas correctamente");
         } else {
             console.error("No se encontraron las celdas a actualizar");
         }
@@ -319,7 +301,6 @@ function updateClient() {
         // Cerrar modal
         closeEditClientModal();
         
-        console.log("Actualización completada exitosamente");
     })
     .catch(error => {
         console.error("Error completo:", error);
