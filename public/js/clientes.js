@@ -1,10 +1,23 @@
+// Archivo clientes.js cargado
+console.log('Archivo clientes.js cargado correctamente');
+
+// Variable global para DataTable de clientes
+let clientsDataTable = null;
+
 function loadClients() {
-    fetch("/api/clients")  // Llama a la API
-        .then(response => response.json())
+    console.log('Cargando clientes desde API...');
+    fetch("/api/clients")
+        .then(response => {
+            console.log('Respuesta recibida:', response);
+            return response.json();
+        })
         .then(data => {
+            console.log('Datos de clientes:', data);
+            
             // Destruir DataTable existente si existe
-            if ($.fn.DataTable.isDataTable('#clientsTable')) {
-                $('#clientsTable').DataTable().destroy();
+            if (clientsDataTable) {
+                clientsDataTable.destroy();
+                clientsDataTable = null;
             }
             
             let tableBody = document.querySelector("#clientsTable tbody");
@@ -14,86 +27,123 @@ function loadClients() {
                 appendClientRow(client);
             });
             
-            // Inicializar DataTable después de cargar los datos
-            initializeDataTable();
+            // Esperar un momento para que la tabla se renderice completamente
+            setTimeout(() => {
+                initializeClientsDataTable();
+            }, 200);
+        })
+        .catch(error => {
+            console.error('Error al cargar clientes:', error);
         });
 }
 
-function initializeDataTable() {
-    $('#clientsTable').DataTable({
-        "language": {
-            "lengthMenu": "Mostrar _MENU_ registros por página",
-            "zeroRecords": "No se encontraron resultados",
-            "info": "Mostrando página _PAGE_ de _PAGES_ (_TOTAL_ registros en total)",
-            "infoEmpty": "No hay registros disponibles",
-            "infoFiltered": "(filtrado de _MAX_ registros totales)",
-            "search": "Buscar:",
-            "paginate": {
-                "first": "Primero",
-                "last": "Último", 
-                "next": "Siguiente",
-                "previous": "Anterior"
+function initializeClientsDataTable() {
+    console.log('Inicializando DataTable ESPECÍFICO para clientes...');
+    
+    // Verificar que jQuery y DataTables estén disponibles
+    if (typeof $ === 'undefined') {
+        console.error('jQuery no está disponible para clientes');
+        return;
+    }
+    
+    if (typeof $.fn.DataTable === 'undefined') {
+        console.error('DataTables no está disponible para clientes');
+        return;
+    }
+    
+    try {
+        clientsDataTable = $('#clientsTable').DataTable({
+            "destroy": true,
+            "language": {
+                "lengthMenu": "Mostrar _MENU_ registros por página",
+                "zeroRecords": "No se encontraron resultados",
+                "info": "Mostrando página _PAGE_ de _PAGES_ (_TOTAL_ registros en total)",
+                "infoEmpty": "No hay registros disponibles",
+                "infoFiltered": "(filtrado de _MAX_ registros totales)",
+                "search": "Buscar:",
+                "paginate": {
+                    "first": "Primero",
+                    "last": "Último", 
+                    "next": "Siguiente",
+                    "previous": "Anterior"
+                },
+                "emptyTable": "No hay datos disponibles en la tabla",
+                "loadingRecords": "Cargando...",
+                "processing": "Procesando..."
             },
-            "emptyTable": "No hay datos disponibles en la tabla",
-            "loadingRecords": "Cargando...",
-            "processing": "Procesando..."
-        },
-        "pageLength": 10,
-        "lengthMenu": [[5, 10, 25, 50, -1], [5, 10, 25, 50, "Todos"]],
-        "responsive": true,
-        "dom": '<"top"<"dataTables_filter"f>>rt<"bottom"<"dataTables_info"i><"dataTables_paginate"p>>',
-        "columnDefs": [
-            {
-                "targets": 0,
-                "orderable": true,
-                "searchable": true,
-                "className": "text-center",
-                "width": "150px"
-            },
-            {
-                "targets": 1,
-                "orderable": true,
-                "searchable": true,
-                "width": "auto"
-            },
-            {
-                "targets": 2,
-                "orderable": false,
-                "searchable": false,
-                "className": "text-center",
-                "width": "280px"
-            }
-        ],
-        "order": [[1, 'asc']],
-        "searching": true,
-        "paging": true,
-        "info": true,
-        "autoWidth": false,
-        "processing": true,
-        "stateSave": false,
-        "drawCallback": function(settings) {
-            // Aplicar estilos después de cada redibujado
-            $('.cell-ruc').removeClass('px-6 py-5').addClass('px-3 py-2');
-            $('.cell-business-name').removeClass('px-6 py-5').addClass('px-3 py-2');
-        },
-        "initComplete": function(settings, json) {
-            // Personalizar el campo de búsqueda
-            $('.dataTables_filter input').attr('placeholder', 'Buscar clientes...');
+            "pageLength": 10,
+            "responsive": true,
+            "searching": true,
+            "paging": true,
+            "info": true,
+            "lengthChange": false, // Ocultar selector de registros por página
+            "dom": '<"d-flex justify-content-start mb-3"f>rtip', // Forzar búsqueda a la izquierda con Bootstrap classes
+            "columnDefs": [
+                {
+                    "targets": 0,
+                    "orderable": true,
+                    "searchable": true,
+                    "className": "text-center",
+                    "width": "150px"
+                },
+                {
+                    "targets": 1,
+                    "orderable": true,
+                    "searchable": true,
+                    "className": "uppercase",
+                    "width": "auto"
+                },
+                {
+                    "targets": 2,
+                    "orderable": false,
+                    "searchable": false,
+                    "className": "text-center",
+                    "width": "280px"
+                }
+            ],
+            "order": [[1, 'asc']]
+        });
+        
+        console.log('DataTable de CLIENTES inicializado correctamente');
+        console.log('Tabla DataTable clientes:', clientsDataTable);
+        
+        // Verificar que los elementos de DataTables estén presentes y hacer el input editable
+        setTimeout(() => {
+            const wrapper = $('#clientsTable_wrapper');
+            const searchInput = $('#clientsTable_filter input');
+            const pagination = $('#clientsTable_paginate');
+            const info = $('#clientsTable_info');
+            const length = $('#clientsTable_length');
             
-            // Agregar clases personalizadas
-            $('.dataTables_length select').addClass('form-select');
-            $('.dataTables_filter input').addClass('form-control');
-        }
-    });
-}
-
-function validateRucDni(input) {
-    // Elimina cualquier carácter que no sea un número
-    input.value = input.value.replace(/[^0-9]/g, '');
-
-    // Limita la longitud a 8 o 11 caracteres
-    if (input.value.length > 11) {
-        input.value = input.value.slice(0, 11);
+            console.log('=== DIAGNÓSTICO CLIENTES ===');
+            console.log('Wrapper encontrado:', wrapper.length > 0 ? 'SÍ' : 'NO');
+            console.log('Campo de búsqueda encontrado:', searchInput.length > 0 ? 'SÍ' : 'NO');
+            
+            // Forzar que el input de búsqueda sea editable
+            if (searchInput.length > 0) {
+                searchInput.prop('readonly', false);
+                searchInput.prop('disabled', false);
+                searchInput.css({
+                    'pointer-events': 'auto',
+                    'user-select': 'text',
+                    '-webkit-user-select': 'text',
+                    '-moz-user-select': 'text',
+                    '-ms-user-select': 'text'
+                });
+                searchInput.attr('placeholder', 'Buscar clientes...'); // Añadir placeholder
+                console.log('Input de búsqueda habilitado para clientes');
+            }
+            console.log('Paginación encontrada:', pagination.length > 0 ? 'SÍ' : 'NO');
+            console.log('Info encontrada:', info.length > 0 ? 'SÍ' : 'NO');
+            console.log('Length encontrado:', length.length > 0 ? 'SÍ' : 'NO');
+            
+            if (searchInput.length === 0) {
+                console.error('No se encontró el campo de búsqueda de DataTables para clientes');
+            }
+        }, 300);
+        
+    } catch (error) {
+        console.error('Error al inicializar DataTable de clientes:', error);
     }
 }
 
@@ -148,7 +198,7 @@ function addClient() {
     let businessName = document.getElementById("businessName").value;
 
     if (!rucDni || !businessName) {
-        alert("Por favor, complete todos los campos.");
+        showErrorMessage("Por favor, complete todos los campos.");
         return;
     }
 
@@ -161,7 +211,7 @@ function addClient() {
     .then(data => {
         console.log("Cliente creado, data recibida:", data);
         
-        alert("Cliente registrado con éxito.");
+        showSuccessMessage("Cliente registrado con éxito");
         
         // Verificar que tenemos el cliente en la respuesta
         if (data.client) {
@@ -182,7 +232,7 @@ function addClient() {
     })
     .catch(error => {
         console.error("Error al agregar cliente:", error);
-        alert("Error al agregar el cliente. Por favor, intente nuevamente.");
+        showErrorMessage("Error al agregar el cliente. Por favor, intente nuevamente.");
     });
 }
 
@@ -219,7 +269,7 @@ function updateClient() {
     const businessName = document.getElementById("editBusinessName").value;
 
     if (!rucDni || !businessName) {
-        alert("Por favor, complete todos los campos.");
+        showErrorMessage("Por favor, complete todos los campos.");
         return;
     }
 
@@ -238,7 +288,7 @@ function updateClient() {
         console.log("Data recibida:", data);
         
         // Mostrar mensaje de éxito
-        alert("Cliente actualizado con éxito.");
+        showSuccessMessage("Cliente actualizado con éxito");
         
         // Actualizar las celdas manteniendo la estructura y clases CSS correctas
         const businessNameCell = document.querySelector(`#row-${id} td:nth-child(2)`);
@@ -273,7 +323,7 @@ function updateClient() {
     })
     .catch(error => {
         console.error("Error completo:", error);
-        alert("Error al actualizar el cliente. Por favor, intente nuevamente.");
+        showErrorMessage("Error al actualizar el cliente. Por favor, intente nuevamente.");
     });
 }
 
@@ -402,7 +452,7 @@ function addModalAddress() {
     const zone = document.getElementById("modalZone").value;
 
     if (!address || !zone) {
-        alert("Por favor, complete todos los campos.");
+        showErrorMessage("Por favor, complete todos los campos.");
         return;
     }
 
@@ -413,12 +463,12 @@ function addModalAddress() {
     })
     .then(response => response.json())
     .then(data => {
-        alert("Dirección agregada correctamente.");
+        showSuccessMessage("Dirección agregada correctamente");
         closeAddAddressModal();
     })
     .catch(error => {
         console.error("Error al agregar dirección:", error);
-        alert("Error al agregar la dirección. Por favor, intente nuevamente.");
+        showErrorMessage("Error al agregar la dirección. Por favor, intente nuevamente.");
     });
 }
 
@@ -514,7 +564,7 @@ function editAddress(addressId, currentAddress, currentZone) {
         const newZone = zoneInput.value.trim();
         
         if (!newAddress || !newZone) {
-            alert("Por favor, complete todos los campos.");
+            showErrorMessage("Por favor, complete todos los campos.");
             return;
         }
         
@@ -540,7 +590,7 @@ function editAddress(addressId, currentAddress, currentZone) {
             return response.json();
         })
         .then(data => {
-            alert("Dirección actualizada correctamente");
+            showSuccessMessage("Dirección actualizada correctamente");
             closeModal();
             // Si el modal de ver direcciones está abierto, actualizar la lista
             if (!document.getElementById("viewAddressModal").classList.contains("hidden")) {
@@ -550,7 +600,7 @@ function editAddress(addressId, currentAddress, currentZone) {
         })
         .catch(error => {
             console.error("Error al editar dirección:", error);
-            alert("Error al actualizar la dirección");
+            showErrorMessage("Error al actualizar la dirección");
             
             // Restaurar el botón
             saveBtn.disabled = false;
@@ -562,4 +612,67 @@ function editAddress(addressId, currentAddress, currentZone) {
             `;
         });
     });
+}
+
+// Funciones para mostrar mensajes tipo toast
+function showSuccessMessage(message) {
+    // Crear un toast de éxito
+    const toast = createToast(message, 'success');
+    document.body.appendChild(toast);
+    
+    // Mostrar el toast usando transform directamente
+    setTimeout(() => {
+        toast.style.transform = 'translateX(0)';
+    }, 100);
+    
+    // Remover el toast después de 3 segundos
+    setTimeout(() => {
+        toast.style.transform = 'translateX(100%)';
+        setTimeout(() => {
+            if (toast.parentNode) {
+                document.body.removeChild(toast);
+            }
+        }, 300);
+    }, 3000);
+}
+
+function showErrorMessage(message) {
+    // Crear un toast de error
+    const toast = createToast(message, 'error');
+    document.body.appendChild(toast);
+    
+    // Mostrar el toast usando transform directamente
+    setTimeout(() => {
+        toast.style.transform = 'translateX(0)';
+    }, 100);
+    
+    // Remover el toast después de 3 segundos
+    setTimeout(() => {
+        toast.style.transform = 'translateX(100%)';
+        setTimeout(() => {
+            if (toast.parentNode) {
+                document.body.removeChild(toast);
+            }
+        }, 300);
+    }, 3000);
+}
+
+function createToast(message, type) {
+    const toast = document.createElement('div');
+    const bgColor = type === 'success' ? 'bg-green-500' : 'bg-red-500';
+    
+    toast.className = `fixed top-4 right-4 ${bgColor} text-white px-6 py-3 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform duration-300 ease-in-out`;
+    toast.innerHTML = `
+        <div class="flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                ${type === 'success' 
+                    ? '<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />'
+                    : '<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />'
+                }
+            </svg>
+            <span>${message}</span>
+        </div>
+    `;
+    
+    return toast;
 }

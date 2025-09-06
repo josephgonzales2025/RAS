@@ -21,8 +21,10 @@ class UpdateSupplierRequest extends FormRequest
      */
     public function rules(): array
     {
+        $supplierId = $this->route('supplier')->id ?? $this->route('supplier');
+        
         return [
-            'ruc_dni' => 'sometimes|required|string|max:11|unique:suppliers,ruc_dni',
+            'ruc_dni' => 'sometimes|required|string|max:11|unique:suppliers,ruc_dni,' . $supplierId,
             'business_name' => 'sometimes|required|string|max:255'
         ];
     }
