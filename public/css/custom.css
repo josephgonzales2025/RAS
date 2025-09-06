@@ -20,6 +20,77 @@ input[type="text"]:not(.no-uppercase), select:not(.no-uppercase) {
     text-transform: none !important;
 }
 
+/* Estilos para la sección de entradas de mercadería */
+.merchandise-table tbody tr {
+    border-bottom: 1px solid #e5e7eb;
+    transition: background-color 0.2s ease;
+}
+
+.merchandise-table tbody tr:hover {
+    background-color: #f9fafb;
+}
+
+.merchandise-table tbody td {
+    padding: 1rem;
+    vertical-align: middle;
+    font-size: 0.875rem;
+    color: #374151;
+}
+
+.merchandise-table thead th {
+    background-color: #f9fafb;
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #6b7280;
+}
+
+/* Botones de acción en la tabla */
+.action-button {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: 0.375rem;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.action-button-edit {
+    background-color: #3b82f6;
+    color: white;
+}
+
+.action-button-edit:hover {
+    background-color: #2563eb;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.action-button-delete {
+    background-color: #ef4444;
+    color: white;
+}
+
+.action-button-delete:hover {
+    background-color: #dc2626;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.action-button-products {
+    background-color: #10b981;
+    color: white;
+}
+
+.action-button-products:hover {
+    background-color: #059669;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
 /* Estilos para dropdown de acciones */
 .dropdown-container {
     position: relative !important;

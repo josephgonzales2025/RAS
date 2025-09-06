@@ -12,7 +12,7 @@ class MerchandiseEntryController
      */
     public function index()
     {
-        $entries = MerchandiseEntry::where('status', 'Pending')->with(['supplier', 'client', 'clientAddress'])->get();
+        $entries = MerchandiseEntry::where('status', 'Pending')->with(['supplier', 'client', 'clientAddress'])->orderBy('created_at', 'desc')->get();
         return response()->json($entries);
     }
     

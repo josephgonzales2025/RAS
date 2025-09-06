@@ -263,6 +263,11 @@ function addMerchandiseEntry() {
     
             // Mostrar un mensaje de éxito
             alert("Entrada de mercancía agregada con éxito.");
+            const modal = document.getElementById('addEntryModal');
+            if (modal) {
+                modal.classList.add('hidden');
+                document.body.classList.remove('overflow-hidden');
+            }
         })
         .catch(error => {
             console.error("Error al agregar la entrada de mercancía:", error);
@@ -677,12 +682,14 @@ function filterTableM() {
     rows.forEach(row => {
         const providerCell = row.querySelector('td:nth-child(3)'); // Columna de Proveedor
         const clientCell = row.querySelector('td:nth-child(4)'); // Columna de Cliente
+        const zonaCell = row.querySelector('td:nth-child(6)'); // Columna de Zona
 
         const providerText = providerCell ? providerCell.textContent.toLowerCase() : '';
         const clientText = clientCell ? clientCell.textContent.toLowerCase() : '';
+        const zonaText = zonaCell ? zonaCell.textContent.toLowerCase() : '';
 
         // Mostrar la fila si coincide con el texto de búsqueda
-        if (providerText.includes(searchInput) || clientText.includes(searchInput)) {
+        if (providerText.includes(searchInput) || clientText.includes(searchInput) || zonaText.includes(searchInput)) {
             row.style.display = ''; // Mostrar la fila
         } else {
             row.style.display = 'none'; // Ocultar la fila
@@ -742,3 +749,51 @@ function assignSelectedEntriesToDispatch() {
         })
         .catch(error => console.error('Error al asignar los registros:', error));
 }
+
+// Funciones para el modal de nueva entrada
+function openAddEntryModal() {
+    const modal = document.getElementById('addEntryModal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+        
+        // Limpiar el formulario
+        const form = document.getElementById('addMerchandiseEntryForm');
+        if (form) {
+            form.reset();
+        }
+        
+        // Recargar datos de proveedores y clientes
+        loadSuppliers();
+        loadClients();
+    }
+}
+
+function closeAddEntryModal() {
+    const modal = document.getElementById('addEntryModal');
+    if (modal) {
+        modal.classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+        
+        // Limpiar el formulario
+        const form = document.getElementById('addMerchandiseEntryForm');
+        if (form) {
+            form.reset();
+        }
+    }
+}
+
+// Cerrar modal con tecla Escape
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        closeAddEntryModal();
+    }
+});
+
+// Cerrar modal al hacer clic fuera del contenido
+document.addEventListener('click', function(event) {
+    const modal = document.getElementById('addEntryModal');
+    if (modal && event.target === modal) {
+        closeAddEntryModal();
+    }
+});
