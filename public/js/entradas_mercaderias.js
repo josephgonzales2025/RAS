@@ -13,6 +13,11 @@ document.addEventListener("DOMContentLoaded", function () {
             allowClear: true
         });
     }
+
+    // Inicializar DataTable si la tabla existe
+    if ($('#merchandiseEntriesTable').length) {
+        loadMerchandiseEntries();
+    }
 });
 
 // Función para configurar el modal de entrada
@@ -154,52 +159,141 @@ function loadClientAddresses() {
         .catch(error => console.error("Error al cargar direcciones del cliente:", error));
 }
 
-function loadMerchandiseEntries() {
-    const tableBody = document.querySelector("#merchandiseEntriesTable tbody");
+// Variable global para el DataTable
+let merchandiseTable;
 
-    // Verificar si el elemento existe
-    if (!tableBody) {
-        console.warn("El elemento #merchandiseEntriesTable tbody no existe en el DOM.");
-        return; // Salir de la función si el elemento no existe
+function loadMerchandiseEntries() {
+    // Si el DataTable ya existe, destruirlo
+    if (merchandiseTable) {
+        merchandiseTable.destroy();
     }
 
-    fetch('/api/merchandise-entries') // Llama a la API para obtener las entradas de mercancía
-        .then(response => response.json())
-        .then(data => {
-            const tableBody = document.querySelector("#merchandiseEntriesTable tbody");
-            tableBody.innerHTML = ""; // Limpia las filas existentes en la tabla
-
-            data.forEach(entry => {
-
-                const row = document.createElement("tr");
-                row.innerHTML = `
-                    <td class="border p-2">${entry.reception_date}</td>
-                    <td class="border p-2">${entry.guide_number}</td>
-                    <td class="border p-2">${entry.supplier ? entry.supplier.business_name : 'N/A'}</td>
-                    <td class="border p-2">${entry.client ? entry.client.business_name : 'N/A'}</td>
-                    <td class="border p-2">${entry.client_address ? entry.client_address.address : 'N/A'}</td>
-                    <td class="border p-2">${entry.client_address ? entry.client_address.zone : 'N/A'}</td>
-                    <td class="border p-2">${entry.total_weight} kg</td>
-                    <td class="border p-2">${entry.total_freight}</td>
-                    <td class="border p-2">
+    // Inicializar DataTable
+    merchandiseTable = $('#merchandiseEntriesTable').DataTable({
+        ajax: {
+            url: '/api/merchandise-entries',
+            dataSrc: ''
+        },
+        columns: [
+            { 
+                data: 'reception_date',
+                render: function(data) {
+                    return new Date(data).toLocaleDateString('es-ES');
+                }
+            },
+            { data: 'guide_number' },
+            { 
+                data: 'supplier',
+                render: function(data) {
+                    return data ? data.business_name : 'N/A';
+                }
+            },
+            { 
+                data: 'client',
+                render: function(data) {
+                    return data ? data.business_name : 'N/A';
+                }
+            },
+            { 
+                data: 'client_address',
+                render: function(data) {
+                    return data ? data.address : 'N/A';
+                }
+            },
+            { 
+                data: 'client_address',
+                render: function(data) {
+                    return data ? data.zone : 'N/A';
+                }
+            },
+            { 
+                data: 'total_weight',
+                render: function(data) {
+                    return data + ' kg';
+                }
+            },
+            { 
+                data: 'total_freight',
+                render: function(data) {
+                    return 'S/ ' + parseFloat(data).toFixed(2);
+                }
+            },
+            {
+                data: null,
+                orderable: false,
+                render: function(data, type, row) {
+                    return `
                         <div class="flex gap-2 justify-center">
-                            <button class="bg-blue-500 text-white p-1 rounded" onclick="openEditModal(${entry.id})">Editar</button>
-                            <button class="bg-orange-500 text-white p-1 rounded" onclick="openProductModal(${entry.id})">Ver Productos</button>
+                            <button class="action-button action-button-edit text-xs px-2 py-1" onclick="openEditModal(${row.id})">
+                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                </svg>
+                                Editar
+                            </button>
+                            <button class="action-button action-button-products text-xs px-2 py-1" onclick="openProductModal(${row.id})">
+                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                                </svg>
+                                Productos
+                            </button>
                         </div>
-                    </td>
-                    <td class="border p-2">
-                        <input type="checkbox" class="entryCheckbox" value="${entry.id}">
-                    </td>
-                `;
-                tableBody.appendChild(row);
-            });
-            
-        })
-        .catch(error => console.error('Error al cargar las entradas de mercancía:', error));
+                    `;
+                }
+            },
+            {
+                data: null,
+                orderable: false,
+                render: function(data, type, row) {
+                    return `<input type="checkbox" class="entryCheckbox rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" value="${row.id}">`;
+                }
+            }
+        ],
+
+        order: [[0, 'desc']],
+        language: {
+            "lengthMenu": "Mostrar _MENU_ registros por página",
+            "zeroRecords": "No se encontraron resultados",
+            "info": "Mostrando página _PAGE_ de _PAGES_ (_TOTAL_ registros en total)",
+            "infoEmpty": "No hay registros disponibles",
+            "infoFiltered": "(filtrado de _MAX_ registros totales)",
+            "search": "Buscar:",
+            "paginate": {
+                "first": "Primero",
+                "last": "Último", 
+                "next": "Siguiente",
+                "previous": "Anterior"
+            },
+            "emptyTable": "No hay datos disponibles en la tabla",
+            "loadingRecords": "Cargando...",
+            "processing": "Procesando..."
+        },
+        responsive: true,
+        pageLength: 10,
+        lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
+        lengthChange: false,
+        dom: '<"flex flex-col lg:flex-row lg:justify-between lg:items-center mb-4"<"mb-4 lg:mb-0"l><"mb-4 lg:mb-0"f>>rtip',
+        drawCallback: function() {
+            // Reajustar estilos después de cada draw
+            this.api().tables().nodes().to$().removeClass('table table-striped table-bordered');
+        },
+        initComplete: function() {
+            // Personalizar el mensaje de "No hay datos"
+            $('.dataTables_empty').html(`
+                <div class="flex flex-col items-center justify-center text-gray-500 py-12">
+                    <svg class="w-16 h-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 5H7a2 2 0 00-2 2v6a2 2 0 002 2h6a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                    </svg>
+                    <p class="text-lg font-medium text-gray-400">No hay entradas registradas</p>
+                    <p class="text-sm text-gray-400 mt-1">Las entradas de mercadería aparecerán aquí una vez que las agregues</p>
+                </div>
+            `);
+        }
+    });
 }
 
 function toggleSelectAll(selectAllCheckbox) {
-    const checkboxes = document.querySelectorAll(".entryCheckbox");
+    // Seleccionar todos los checkboxes visibles en la página actual de DataTables
+    const checkboxes = document.querySelectorAll("#merchandiseEntriesTable .entryCheckbox");
     checkboxes.forEach(checkbox => {
         checkbox.checked = selectAllCheckbox.checked;
     });
@@ -262,7 +356,7 @@ function addMerchandiseEntry() {
             form.reset();
     
             // Mostrar un mensaje de éxito
-            alert("Entrada de mercancía agregada con éxito.");
+            showSuccessMessage("Entrada de mercancía agregada con éxito.");
             const modal = document.getElementById('addEntryModal');
             if (modal) {
                 modal.classList.add('hidden');
@@ -462,7 +556,7 @@ function updateMerchandiseEntry(entryId, formData) {
             closeEditModal();
 
             // Mostrar un mensaje de éxito
-            alert("Entrada de mercancía actualizada con éxito.");
+            showSuccessMessage("Entrada de mercancía actualizada con éxito.");
         })
         .catch(error => {
             console.error("Error al actualizar la entrada de mercancía:", error);
@@ -673,29 +767,6 @@ window.addEventListener('merchandiseEntryAssigned', () => {
     console.log('Ejecutando loadMerchandiseEntries');
     loadMerchandiseEntries(); // Recargar la tabla de entradas de mercancía
 });
-
-function filterTableM() {
-    const searchInput = document.getElementById('searchInput').value.toLowerCase();
-    const table = document.querySelector('#merchandiseEntriesTable');
-    const rows = table.querySelectorAll('tr');
-
-    rows.forEach(row => {
-        const providerCell = row.querySelector('td:nth-child(3)'); // Columna de Proveedor
-        const clientCell = row.querySelector('td:nth-child(4)'); // Columna de Cliente
-        const zonaCell = row.querySelector('td:nth-child(6)'); // Columna de Zona
-
-        const providerText = providerCell ? providerCell.textContent.toLowerCase() : '';
-        const clientText = clientCell ? clientCell.textContent.toLowerCase() : '';
-        const zonaText = zonaCell ? zonaCell.textContent.toLowerCase() : '';
-
-        // Mostrar la fila si coincide con el texto de búsqueda
-        if (providerText.includes(searchInput) || clientText.includes(searchInput) || zonaText.includes(searchInput)) {
-            row.style.display = ''; // Mostrar la fila
-        } else {
-            row.style.display = 'none'; // Ocultar la fila
-        }
-    });
-}
 
 function openAssignToDispatchModal() {
     const modal = document.getElementById("assignToDispatchModal");

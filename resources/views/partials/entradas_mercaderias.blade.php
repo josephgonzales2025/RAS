@@ -8,23 +8,13 @@
 
 
 
-{{-- Buscador --}}
-<div class="mb-6">
-    <label for="searchInput" class="block text-sm font-medium text-gray-700 mb-2">Buscar:</label>
-    <input
-        type="text"
-        id="searchInput"
-        class="border border-gray-300 rounded-md px-4 py-2 w-full max-w-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
-        placeholder="Escribe el nombre del cliente o proveedor..."
-        oninput="filterTableM()"
-    />
-</div>
+
 
 {{-- Sección principal de entradas --}}
 <div class="bg-white rounded-lg shadow-lg border border-gray-200">
     {{-- Header de la tabla --}}
     <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 rounded-t-lg">
-        <div class="flex justify-between items-center">
+        <div class="flex justify-between items-center sm:space-x-4 flex-col sm:flex-row">
             <div class="flex items-center space-x-3">
                 <div class="bg-indigo-100 p-2 rounded-lg">
                     <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -52,7 +42,7 @@
     {{-- Contenido de la tabla --}}
     <div class="p-6">
         <div class="overflow-x-auto">
-            <table id="merchandiseEntriesTable" class="w-full border-collapse">
+            <table id="merchandiseEntriesTable" class="w-full border-collapse display nowrap" style="width:100%">
                 <thead>
                     <tr class="bg-gray-100 border-b border-gray-200">
                         <th class="text-left py-3 px-4 font-semibold text-gray-700 text-sm">FECHA RECEP.</th>
@@ -71,18 +61,6 @@
                 </thead>
                 <tbody id="merchandiseEntriesTableBody">
                     {{-- Filas dinámicas cargadas desde la API --}}
-                    {{-- Mensaje cuando no hay datos --}}
-                    <tr id="noDataRow" class="text-center">
-                        <td colspan="10" class="py-12">
-                            <div class="flex flex-col items-center justify-center text-gray-500">
-                                <svg class="w-16 h-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 5H7a2 2 0 00-2 2v6a2 2 0 002 2h6a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                                </svg>
-                                <p class="text-lg font-medium text-gray-400">No hay entradas registradas</p>
-                                <p class="text-sm text-gray-400 mt-1">Las entradas de mercadería aparecerán aquí una vez que las agregues</p>
-                            </div>
-                        </td>
-                    </tr>
                 </tbody>
             </table>
         </div>

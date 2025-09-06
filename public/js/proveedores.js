@@ -2,11 +2,9 @@
 let suppliersDataTable = null;
 
 function loadSuppliers() {
-    console.log('Cargando proveedores desde API...');
     fetch("/api/suppliers")
         .then(response => response.json())
         .then(data => {
-            console.log('Datos de proveedores recibidos:', data);
             
             // Si DataTables ya está inicializado, destruirlo
             if (suppliersDataTable) {
@@ -32,7 +30,6 @@ function loadSuppliers() {
 }
 
 function initializeSuppliersDataTable() {
-    console.log('Inicializando DataTable ESPECÍFICO para proveedores...');
     
     // Verificar que jQuery y DataTables estén disponibles
     if (typeof $ === 'undefined') {
@@ -98,20 +95,12 @@ function initializeSuppliersDataTable() {
             "order": [[1, 'asc']]
         });
         
-        console.log('DataTable de PROVEEDORES inicializado correctamente');
-        
         // Verificar que los elementos de DataTables estén presentes y hacer el input editable
         setTimeout(() => {
             const wrapper = $('#suppliersTable_wrapper');
             const searchInput = $('#suppliersTable_filter input');
             const pagination = $('#suppliersTable_paginate');
             const info = $('#suppliersTable_info');
-            
-            console.log('=== DIAGNÓSTICO PROVEEDORES ===');
-            console.log('Wrapper encontrado:', wrapper.length > 0 ? 'SÍ' : 'NO');
-            console.log('Campo de búsqueda encontrado:', searchInput.length > 0 ? 'SÍ' : 'NO');
-            console.log('Paginación encontrada:', pagination.length > 0 ? 'SÍ' : 'NO');
-            console.log('Info encontrada:', info.length > 0 ? 'SÍ' : 'NO');
             
             // Forzar que el input de búsqueda sea editable
             if (searchInput.length > 0) {
@@ -125,7 +114,6 @@ function initializeSuppliersDataTable() {
                     '-ms-user-select': 'text'
                 });
                 searchInput.attr('placeholder', 'Buscar proveedores...');
-                console.log('Input de búsqueda habilitado para proveedores');
             }
         }, 300);
         
@@ -179,15 +167,12 @@ function addSupplier() {
         return;
     }
 
-    console.log('Enviando nuevo proveedor:', { ruc_dni: rucDni, business_name: businessName });
-
     fetch("/api/suppliers", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ruc_dni: rucDni, business_name: businessName })
     })
     .then(response => {
-        console.log('Respuesta del servidor:', response);
         if (!response.ok) {
             return response.json().then(errorData => {
                 console.error('Error del servidor:', errorData);
@@ -197,8 +182,6 @@ function addSupplier() {
         return response.json();
     })
     .then(data => {
-        console.log('Proveedor creado:', data);
-        
         // Mostrar mensaje de éxito
         showSuccessMessage("Proveedor registrado con éxito");
         
@@ -235,8 +218,6 @@ function updateSupplier() {
         return;
     }
 
-    console.log('Enviando actualización:', { id, ruc_dni: newRucDni, business_name: newBusinessName });
-
     fetch(`/api/suppliers/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -253,7 +234,6 @@ function updateSupplier() {
         return response.json();
     })
     .then(data => {
-        console.log('Proveedor actualizado:', data);
         
         // Mostrar mensaje de éxito
         showSuccessMessage("Proveedor actualizado con éxito");
