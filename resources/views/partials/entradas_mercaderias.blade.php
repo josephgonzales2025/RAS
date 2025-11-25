@@ -238,3 +238,32 @@
         </div>
     </div>
 </div>
+
+{{-- Modal de confirmación para eliminar entrada --}}
+<div id="deleteConfirmModal" class="hidden fixed inset-0 bg-gray-800 bg-opacity-50 z-50">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-md">
+            <div class="flex items-center mb-4">
+                <div class="bg-red-100 p-3 rounded-full mr-4">
+                    <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                    </svg>
+                </div>
+                <h2 class="text-xl font-bold text-gray-800">Confirmar Eliminación</h2>
+            </div>
+            <div class="mb-6">
+                <p class="text-gray-600 mb-4">¿Está seguro de que desea eliminar esta entrada de mercadería?</p>
+                <div class="bg-gray-50 p-4 rounded-md border border-gray-200">
+                    <p class="text-sm text-gray-700"><span class="font-semibold">Guía:</span> <span id="delete_guide_number"></span></p>
+                    <p class="text-sm text-gray-700"><span class="font-semibold">Cliente:</span> <span id="delete_client_name"></span></p>
+                    <p class="text-sm text-gray-700"><span class="font-semibold">Proveedor:</span> <span id="delete_supplier_name"></span></p>
+                </div>
+                <p class="text-red-600 text-sm mt-3 font-medium">Esta acción no se puede deshacer.</p>
+            </div>
+            <div class="flex justify-end space-x-3">
+                <button class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md font-medium transition-colors" onclick="closeDeleteModal()">Cancelar</button>
+                <button class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md font-medium transition-colors" onclick="confirmDelete()">Eliminar</button>
+            </div>
+        </div>
+    </div>
+</div>

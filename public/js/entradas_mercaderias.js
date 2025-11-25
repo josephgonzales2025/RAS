@@ -27,26 +27,26 @@ function setupEntryModal() {
     const modal = document.getElementById('entryModal');
     const openModalBtn = document.getElementById('openEntryModalBtn');
     const closeModalBtn = document.getElementById('closeEntryModalBtn');
-    
+
     // Si no existen los elementos del modal, simplemente retorna sin error
     if (!modal || !openModalBtn || !closeModalBtn) {
         console.info('Modal de entrada no encontrado - usando formulario directo');
         return;
     }
-    
+
     // Abrir modal
-    openModalBtn.addEventListener('click', function() {
+    openModalBtn.addEventListener('click', function () {
         modal.classList.remove('hidden');
         document.body.classList.add('overflow-hidden');
     });
-    
+
     // Cerrar modal
-    closeModalBtn.addEventListener('click', function() {
+    closeModalBtn.addEventListener('click', function () {
         closeEntryModal();
     });
-    
+
     // Cerrar modal al hacer clic fuera del contenido
-    modal.addEventListener('click', function(e) {
+    modal.addEventListener('click', function (e) {
         if (e.target === modal) {
             closeEntryModal();
         }
@@ -57,12 +57,12 @@ function setupEntryModal() {
 function closeEntryModal() {
     const modal = document.getElementById('entryModal');
     const form = document.getElementById('addMerchandiseEntryForm');
-    
+
     if (modal) {
         modal.classList.add('hidden');
         document.body.classList.remove('overflow-hidden');
     }
-    
+
     if (form) {
         form.reset();
     }
@@ -175,53 +175,53 @@ function loadMerchandiseEntries() {
             dataSrc: ''
         },
         columns: [
-            { 
+            {
                 data: 'reception_date',
-                render: function(data) {
+                render: function (data) {
                     return new Date(data).toLocaleDateString('es-ES');
                 }
             },
             { data: 'guide_number' },
-            { 
+            {
                 data: 'supplier',
-                render: function(data) {
+                render: function (data) {
                     return data ? data.business_name : 'N/A';
                 }
             },
-            { 
+            {
                 data: 'client',
-                render: function(data) {
+                render: function (data) {
                     return data ? data.business_name : 'N/A';
                 }
             },
-            { 
+            {
                 data: 'client_address',
-                render: function(data) {
+                render: function (data) {
                     return data ? data.address : 'N/A';
                 }
             },
-            { 
+            {
                 data: 'client_address',
-                render: function(data) {
+                render: function (data) {
                     return data ? data.zone : 'N/A';
                 }
             },
-            { 
+            {
                 data: 'total_weight',
-                render: function(data) {
+                render: function (data) {
                     return data + ' kg';
                 }
             },
-            { 
+            {
                 data: 'total_freight',
-                render: function(data) {
+                render: function (data) {
                     return 'S/ ' + parseFloat(data).toFixed(2);
                 }
             },
             {
                 data: null,
                 orderable: false,
-                render: function(data, type, row) {
+                render: function (data, type, row) {
                     return `
                         <div class="flex gap-2 justify-center">
                             <button class="action-button action-button-edit text-xs px-2 py-1" onclick="openEditModal(${row.id})">
@@ -236,6 +236,12 @@ function loadMerchandiseEntries() {
                                 </svg>
                                 Productos
                             </button>
+                            <button class="action-button action-button-delete text-xs px-2 py-1" onclick="openDeleteModal(${row.id}, '${row.guide_number}', '${row.client ? row.client.business_name : 'N/A'}', '${row.supplier ? row.supplier.business_name : 'N/A'}')">
+                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                </svg>
+                                Eliminar
+                            </button>
                         </div>
                     `;
                 }
@@ -243,7 +249,7 @@ function loadMerchandiseEntries() {
             {
                 data: null,
                 orderable: false,
-                render: function(data, type, row) {
+                render: function (data, type, row) {
                     return `<input type="checkbox" class="entryCheckbox rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" value="${row.id}">`;
                 }
             }
@@ -259,7 +265,7 @@ function loadMerchandiseEntries() {
             "search": "Buscar:",
             "paginate": {
                 "first": "Primero",
-                "last": "Último", 
+                "last": "Último",
                 "next": "Siguiente",
                 "previous": "Anterior"
             },
@@ -272,11 +278,11 @@ function loadMerchandiseEntries() {
         lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
         lengthChange: false,
         dom: '<"flex flex-col lg:flex-row lg:justify-between lg:items-center mb-4"<"mb-4 lg:mb-0"l><"mb-4 lg:mb-0"f>>rtip',
-        drawCallback: function() {
+        drawCallback: function () {
             // Reajustar estilos después de cada draw
             this.api().tables().nodes().to$().removeClass('table table-striped table-bordered');
         },
-        initComplete: function() {
+        initComplete: function () {
             // Personalizar el mensaje de "No hay datos"
             $('.dataTables_empty').html(`
                 <div class="flex flex-col items-center justify-center text-gray-500 py-12">
@@ -338,7 +344,7 @@ function addMerchandiseEntry() {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify(data)
-        })
+    })
         .then(async response => {
             if (!response.ok) {
                 const errorText = await response.text();
@@ -348,13 +354,13 @@ function addMerchandiseEntry() {
         })
         .then(result => {
             console.log("Entrada de mercancía agregada con éxito:", result);
-    
+
             // Actualizar la tabla de entradas de mercancía
             loadMerchandiseEntries();
-    
+
             // Limpiar el formulario
             form.reset();
-    
+
             // Mostrar un mensaje de éxito
             showSuccessMessage("Entrada de mercancía agregada con éxito.");
             const modal = document.getElementById('addEntryModal');
@@ -630,7 +636,7 @@ function addProductToMerchandiseEntry(merchandiseEntryId, productData) {
         alert("El nombre del producto es obligatorio.");
         return;
     }
-    
+
     if (productData.quantity <= 0) {
         alert("La cantidad debe ser mayor a 0.");
         return;
@@ -827,13 +833,13 @@ function openAddEntryModal() {
     if (modal) {
         modal.classList.remove('hidden');
         document.body.classList.add('overflow-hidden');
-        
+
         // Limpiar el formulario
         const form = document.getElementById('addMerchandiseEntryForm');
         if (form) {
             form.reset();
         }
-        
+
         // Recargar datos de proveedores y clientes
         loadSuppliers();
         loadClients();
@@ -845,7 +851,7 @@ function closeAddEntryModal() {
     if (modal) {
         modal.classList.add('hidden');
         document.body.classList.remove('overflow-hidden');
-        
+
         // Limpiar el formulario
         const form = document.getElementById('addMerchandiseEntryForm');
         if (form) {
@@ -855,16 +861,90 @@ function closeAddEntryModal() {
 }
 
 // Cerrar modal con tecla Escape
-document.addEventListener('keydown', function(event) {
+document.addEventListener('keydown', function (event) {
     if (event.key === 'Escape') {
         closeAddEntryModal();
     }
 });
 
 // Cerrar modal al hacer clic fuera del contenido
-document.addEventListener('click', function(event) {
+document.addEventListener('click', function (event) {
     const modal = document.getElementById('addEntryModal');
     if (modal && event.target === modal) {
         closeAddEntryModal();
+    }
+});
+
+// Variable global para almacenar el ID de la entrada a eliminar
+let entryToDelete = null;
+
+// Función para abrir el modal de confirmación de eliminación
+function openDeleteModal(entryId, guideNumber, clientName, supplierName) {
+    entryToDelete = entryId;
+
+    // Actualizar los datos en el modal
+    document.getElementById('delete_guide_number').textContent = guideNumber;
+    document.getElementById('delete_client_name').textContent = clientName;
+    document.getElementById('delete_supplier_name').textContent = supplierName;
+
+    // Mostrar el modal
+    const modal = document.getElementById('deleteConfirmModal');
+    modal.classList.remove('hidden');
+    document.body.classList.add('overflow-hidden');
+}
+
+// Función para cerrar el modal de confirmación de eliminación
+function closeDeleteModal() {
+    const modal = document.getElementById('deleteConfirmModal');
+    modal.classList.add('hidden');
+    document.body.classList.remove('overflow-hidden');
+    entryToDelete = null;
+}
+
+// Función para confirmar y ejecutar la eliminación
+function confirmDelete() {
+    if (!entryToDelete) {
+        console.error('No hay entrada seleccionada para eliminar');
+        return;
+    }
+
+    // Llamar a la API para eliminar la entrada
+    fetch(`/api/merchandise-entries/${entryToDelete}`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+        .then(async response => {
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Error del servidor: ${response.status} - ${errorText}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Cerrar el modal
+            closeDeleteModal();
+
+            // Mostrar mensaje de éxito
+            showSuccessMessage('Entrada de mercadería eliminada con éxito.');
+
+            // Recargar la tabla
+            loadMerchandiseEntries();
+        })
+        .catch(error => {
+            console.error('Error al eliminar la entrada de mercadería:', error);
+            alert('Ocurrió un error al eliminar la entrada de mercadería. Por favor, inténtelo de nuevo.');
+            closeDeleteModal();
+        });
+}
+
+// Cerrar modal de eliminación con tecla Escape
+document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape') {
+        const deleteModal = document.getElementById('deleteConfirmModal');
+        if (deleteModal && !deleteModal.classList.contains('hidden')) {
+            closeDeleteModal();
+        }
     }
 });
