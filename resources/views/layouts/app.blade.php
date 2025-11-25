@@ -11,6 +11,10 @@
         #sidebar {
             transition: width 0.3s ease-in-out;
             overflow: hidden;
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: 40;
         }
         
         #sidebar.collapsed {
@@ -46,8 +50,28 @@
             align-items: center;
         }
         
+        /* Ajustar el margen del contenido principal según el estado del sidebar */
+        main {
+            transition: margin-left 0.3s ease-in-out;
+        }
+        
+        @media (min-width: 768px) {
+            main.sidebar-collapsed {
+                margin-left: 4rem; /* Espacio para el sidebar colapsado */
+            }
+            
+            main.sidebar-expanded {
+                margin-left: 16rem; /* Espacio para el sidebar expandido */
+            }
+        }
+        
         /* En móvil, mantener comportamiento normal */
         @media (max-width: 768px) {
+            #sidebar {
+                position: relative;
+                z-index: 50;
+            }
+            
             #sidebar.collapsed {
                 width: 100%;
             }
@@ -56,6 +80,10 @@
             #sidebar.collapsed h2 {
                 opacity: 1;
                 width: auto;
+            }
+            
+            main {
+                margin-left: 0 !important;
             }
         }
     </style>
@@ -145,39 +173,60 @@
         
         // Funcionalidad de hover para colapsar/expandir el sidebar (solo en desktop)
         const sidebar = document.getElementById('sidebar');
+        const mainContent = document.querySelector('main');
         
         // Verificar si estamos en desktop (md breakpoint de Tailwind es 768px)
         function isDesktop() {
             return window.innerWidth >= 768;
         }
         
+        // Función para actualizar el estado del sidebar y main
+        function updateSidebarState(collapsed) {
+            if (collapsed) {
+                sidebar.classList.add('collapsed');
+                if (mainContent) {
+                    mainContent.classList.remove('sidebar-expanded');
+                    mainContent.classList.add('sidebar-collapsed');
+                }
+            } else {
+                sidebar.classList.remove('collapsed');
+                if (mainContent) {
+                    mainContent.classList.remove('sidebar-collapsed');
+                    mainContent.classList.add('sidebar-expanded');
+                }
+            }
+        }
+        
         // Colapsar sidebar cuando el mouse sale (solo en desktop)
         sidebar.addEventListener('mouseleave', function() {
             if (isDesktop()) {
-                sidebar.classList.add('collapsed');
+                updateSidebarState(true);
             }
         });
         
         // Expandir sidebar cuando el mouse entra (solo en desktop)
         sidebar.addEventListener('mouseenter', function() {
             if (isDesktop()) {
-                sidebar.classList.remove('collapsed');
+                updateSidebarState(false);
             }
         });
         
         // Inicializar el sidebar colapsado en desktop
         if (isDesktop()) {
-            sidebar.classList.add('collapsed');
+            updateSidebarState(true);
         }
         
         // Manejar cambios de tamaño de ventana
         window.addEventListener('resize', function() {
             if (!isDesktop()) {
-                // En móvil, remover la clase collapsed
+                // En móvil, remover las clases
                 sidebar.classList.remove('collapsed');
+                if (mainContent) {
+                    mainContent.classList.remove('sidebar-collapsed', 'sidebar-expanded');
+                }
             } else {
-                // En desktop, agregar la clase collapsed si no está hover
-                sidebar.classList.add('collapsed');
+                // En desktop, inicializar colapsado
+                updateSidebarState(true);
             }
         });
     </script>
