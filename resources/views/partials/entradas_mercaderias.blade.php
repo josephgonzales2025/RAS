@@ -49,7 +49,7 @@
                         <th class="text-left py-3 px-4 font-semibold text-gray-700 text-sm">NO. GUÍA</th>
                         <th class="text-left py-3 px-4 font-semibold text-gray-700 text-sm">PROVEEDOR</th>
                         <th class="text-left py-3 px-4 font-semibold text-gray-700 text-sm">CLIENTE</th>
-                        <th class="text-left py-3 px-4 font-semibold text-gray-700 text-sm">DIRECCIÓN</th>
+                        <!-- <th class="text-left py-3 px-4 font-semibold text-gray-700 text-sm">DIRECCIÓN</th> -->
                         <th class="text-left py-3 px-4 font-semibold text-gray-700 text-sm">ZONA</th>
                         <th class="text-left py-3 px-4 font-semibold text-gray-700 text-sm">PESO (KG)</th>
                         <th class="text-left py-3 px-4 font-semibold text-gray-700 text-sm">FLETE (S/)</th>
