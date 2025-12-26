@@ -172,7 +172,10 @@ function loadMerchandiseEntries() {
     merchandiseTable = $('#merchandiseEntriesTable').DataTable({
         ajax: {
             url: '/api/merchandise-entries',
-            dataSrc: ''
+            dataSrc: '',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
         },
         columns: [
             {
@@ -338,7 +341,8 @@ function addMerchandiseEntry() {
     fetch('/api/merchandise-entries', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
         },
         body: JSON.stringify(data)
     })
@@ -539,7 +543,8 @@ function updateMerchandiseEntry(entryId, formData) {
     return fetch(`/api/merchandise-entries/${entryId}`, {
         method: 'PUT',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
         },
         body: JSON.stringify(data)
     })
@@ -644,6 +649,7 @@ function addProductToMerchandiseEntry(merchandiseEntryId, productData) {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
         },
         body: JSON.stringify(dataToSend),
     })
@@ -706,6 +712,7 @@ function updateProduct(productId, productData, merchandiseEntryId) {
         method: "PUT",
         headers: {
             "Content-Type": "application/json",
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
         },
         body: JSON.stringify(productData),
     })
@@ -745,6 +752,7 @@ function deleteProduct(productId, merchandiseEntryId) {
         method: "DELETE",
         headers: {
             "Content-Type": "application/json",
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
         },
     })
         .then(async response => {

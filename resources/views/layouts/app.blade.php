@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Mi Aplicación')</title>
     <script src="https://cdn.tailwindcss.com"></script> <!-- Framework CSS Tailwind -->
     <link rel="stylesheet" href="{{ asset('css/custom.css') }}"> <!-- Archivo CSS personalizado -->
@@ -143,6 +144,19 @@
                     </span>
                     <span class="menu-text ml-3">Despachos</span>
                 </a>
+            </li>
+            <li class="mt-auto border-t border-gray-700 pt-2">
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit" class="w-full text-left block p-2 hover:bg-red-700 flex items-center text-red-300 hover:text-white transition-colors duration-200">
+                        <span class="menu-icon">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                            </svg>
+                        </span>
+                        <span class="menu-text ml-3">Cerrar Sesión</span>
+                    </button>
+                </form>
             </li>
         </ul>
     </aside>
