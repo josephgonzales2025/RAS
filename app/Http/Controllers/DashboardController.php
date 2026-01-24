@@ -34,9 +34,19 @@ class DashboardController extends Controller
         // Obtener fecha de inicio (últimos 12 meses)
         $startDate = Carbon::now()->subMonths(11)->startOfMonth();
         
+        // Detectar el driver de base de datos
+        $driver = DB::connection()->getDriverName();
+        
+        // Usar la función correcta según el driver
+        if ($driver === 'pgsql') {
+            $dateFormat = "TO_CHAR(dispatches.dispatch_date, 'YYYY-MM')";
+        } else {
+            $dateFormat = "DATE_FORMAT(dispatches.dispatch_date, '%Y-%m')";
+        }
+        
         // Obtener las entradas de mercancía que han sido despachadas (tienen dispatch_id)
         $stats = MerchandiseEntry::select(
-            DB::raw('DATE_FORMAT(dispatches.dispatch_date, "%Y-%m") as month'),
+            DB::raw("$dateFormat as month"),
             DB::raw('SUM(merchandise_entries.total_weight) as total_weight'),
             DB::raw('SUM(merchandise_entries.total_freight) as total_freight')
         )
