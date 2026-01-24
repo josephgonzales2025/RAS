@@ -87,8 +87,9 @@ export default function Index({ auth, dispatches: dispatchesProp, filters = {} }
 
     const loadPendingEntries = async () => {
         try {
-            const data = await merchandiseEntryService.getAll();
-            const pending = data.filter(entry => entry.status === 'Pending');
+            const response = await merchandiseEntryService.getAll();
+            // The API already filters by status='Pending' and returns paginated data
+            const pending = response.data || [];
             setPendingEntries(pending);
             return pending;
         } catch (err) {
