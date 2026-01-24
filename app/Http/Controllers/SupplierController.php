@@ -6,15 +6,28 @@ use App\Http\Requests\StoreSupplierRequest;
 use App\Http\Requests\UpdateSupplierRequest;
 use App\Models\Supplier;
 use Illuminate\Http\JsonResponse;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class SupplierController
 {
     /**
      * Display a listing of the resource.
      */
-    public function index() : JsonResponse
+    public function index() : Response
     {
-        $suppliers = Supplier::orderBy('business_name', 'asc')->get();
+        $suppliers = Supplier::orderBy('id', 'desc')->get();
+        return Inertia::render('Suppliers/Index', [
+            'suppliers' => $suppliers
+        ]);
+    }
+
+    /**
+     * Display a listing of the resource for API.
+     */
+    public function apiIndex() : JsonResponse
+    {
+        $suppliers = Supplier::orderBy('id', 'desc')->get();
         return new JsonResponse($suppliers);
     }
 

@@ -11,9 +11,16 @@ class ClientAddressController
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        return response()->json(ClientAddress::with('client')->get());
+        $query = ClientAddress::with('client');
+        
+        // Filtrar por client_id si se proporciona
+        if ($request->has('client_id')) {
+            $query->where('client_id', $request->client_id);
+        }
+        
+        return response()->json($query->get());
     }
 
     /**
@@ -29,10 +36,7 @@ class ClientAddressController
 
         $clientAddress = ClientAddress::create($validated);
 
-        return response()->json([
-            'message' => 'Address created successfully', 
-            'address' => $clientAddress
-        ], 201);
+        return back()->with('success', 'Dirección agregada exitosamente');
     }
 
     /**
@@ -64,7 +68,7 @@ class ClientAddressController
         $clientAddress = ClientAddress::findOrFail($id);
         $clientAddress->update($validated);
 
-        return response()->json($clientAddress);
+        return back()->with('success', 'Dirección actualizada exitosamente');
     }
 
     /**
@@ -75,6 +79,6 @@ class ClientAddressController
         $clientAddress = ClientAddress::findOrFail($id);
         $clientAddress->delete();
 
-        return response()->json(['message' => 'Address deleted successfully']);
+        return back()->with('success', 'Dirección eliminada exitosamente');
     }
 }

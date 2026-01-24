@@ -6,15 +6,25 @@ use App\Models\Dispatch;
 use App\Models\MerchandiseEntry;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Inertia\Inertia;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class DispatchController
 {
+    /**
+     * Display a listing of the resource for Inertia view.
+     */
+    public function indexView()
+    {
+        return Inertia::render('Dispatches/Index');
+    }
+
     /**
      * Muestra la lista de despachos.
      */
     public function index()
     {
-        $dispatches = Dispatch::with('merchandiseEntries')->get();
+        $dispatches = Dispatch::with('merchandiseEntries.client', 'merchandiseEntries.supplier', 'merchandiseEntries.clientAddress')->orderBy('id', 'desc')->get();
         return response()->json($dispatches);
     }
 
@@ -34,6 +44,36 @@ class DispatchController
         $dispatch = Dispatch::create($validated);
 
         return response()->json(['message' => 'Despacho creado con éxito', 'dispatch' => $dispatch], 201);
+    }
+
+    /**
+     * Update the specified dispatch.
+     */
+    public function update(Request $request, Dispatch $dispatch)
+    {
+        $validated = $request->validate([
+            'dispatch_date' => 'sometimes|date',
+            'driver_name' => 'sometimes|string|max:255',
+            'driver_license' => 'sometimes|string|max:255',
+            'transport_company_name' => 'sometimes|string|max:255',
+            'transport_company_ruc' => 'sometimes|string|max:20',
+        ]);
+
+        $dispatch->update($validated);
+
+        return response()->json(['message' => 'Despacho actualizado con éxito', 'dispatch' => $dispatch]);
+    }
+
+    /**
+     * Remove the specified dispatch from storage.
+     */
+    public function destroy(Dispatch $dispatch)
+    {
+        // Las entradas asociadas volverán a estado Pending automáticamente
+        // debido a la configuración de la base de datos (onDelete cascade o null)
+        $dispatch->delete();
+
+        return response()->json(['message' => 'Despacho eliminado con éxito']);
     }
 
     public function show(Dispatch $dispatch)
@@ -156,6 +196,52 @@ class DispatchController
         ]);
 
         return response()->json(['message' => 'Registros asignados con éxito.']);
+    }
+
+    public function exportPDF(Request $request, Dispatch $dispatch)
+    {
+        // Cargar el despacho con todas sus relaciones
+        $dispatch->load([
+            'merchandiseEntries.supplier',
+            'merchandiseEntries.client',
+            'merchandiseEntries.clientAddress'
+        ]);
+
+        // Obtener las zonas seleccionadas del request
+        $selectedZones = $request->input('zones', []);
+
+        // Filtrar las entradas por las zonas seleccionadas si se especificaron
+        $entries = $dispatch->merchandiseEntries;
+        if (!empty($selectedZones)) {
+            $entries = $entries->filter(function ($entry) use ($selectedZones) {
+                return in_array($entry->clientAddress->zone ?? 'Sin Zona', $selectedZones);
+            });
+        }
+
+        // Agrupar las entradas por zona
+        $entriesByZone = $entries->groupBy(function ($entry) {
+            return $entry->clientAddress->zone ?? 'Sin Zona';
+        });
+
+        // Calcular totales generales
+        $totalWeight = $entries->sum('total_weight');
+        $totalFreight = $entries->sum('total_freight');
+        $totalEntries = $entries->count();
+
+        // Generar el PDF
+        $pdf = Pdf::loadView('pdf.dispatch', [
+            'dispatch' => $dispatch,
+            'entriesByZone' => $entriesByZone,
+            'totalWeight' => $totalWeight,
+            'totalFreight' => $totalFreight,
+            'totalEntries' => $totalEntries
+        ]);
+
+        // Configurar el PDF
+        $pdf->setPaper('a4', 'landscape');
+
+        // Descargar el PDF
+        return $pdf->download('despacho-' . $dispatch->id . '.pdf');
     }
     
 }

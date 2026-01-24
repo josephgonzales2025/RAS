@@ -4,10 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreClientRequest;
 use App\Models\Client;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-
-use function PHPUnit\Framework\isEmpty;
+use Inertia\Inertia;
 
 class ClientController
 {
@@ -16,35 +14,85 @@ class ClientController
      */
     public function index()
     {
-        return Client::with('addresses')->orderBy('business_name', 'asc')->get();
+        $clients = Client::with('addresses')->orderBy('id', 'desc')->get();
+        
+        return Inertia::render('Clients/Index', [
+            'clients' => $clients,
+        ]);
+    }
+
+    /**
+     * Display a listing of the resource for API.
+     */
+    public function apiIndex()
+    {
+        $clients = Client::with('addresses')->orderBy('id', 'desc')->get();
+        return response()->json($clients);
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        return Inertia::render('Clients/Create');
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreClientRequest $request) : JsonResponse
+    public function store(Request $request)
     {
-        $validated = $request->validated();
+        $validated = $request->validate([
+            'business_name' => 'required|string|max:255',
+            'ruc' => 'required|string|max:20|unique:clients,ruc_dni',
+            'email' => 'required|email|max:255',
+            'phone' => 'required|string|max:20',
+        ]);
 
-        $client = Client::create($validated);
+        // Mapear ruc a ruc_dni para guardar en la BD
+        $data = $validated;
+        $data['ruc_dni'] = $validated['ruc'];
+        unset($data['ruc']);
 
-        return new JsonResponse([
-            'message' => 'Client created successfully',
-            'client' => $client
-        ], 201);
+        $client = Client::create($data);
+
+        // Si es una petición AJAX/API, devolver JSON
+        if ($request->expectsJson()) {
+            return response()->json($client, 201);
+        }
+
+        return redirect()->route('clients.index')
+            ->with('success', 'Cliente creado exitosamente');
     }
 
     /**
      * Display the specified resource.
      */
-    public function show($id) : JsonResponse
+    public function show(Client $client)
     {
-        $client = Client::find($id);
-        if($client.isEmpty()){
-            return new JsonResponse(['message' => 'Client not found']);
-        }
         $client->load('addresses');
-        return new JsonResponse($client);
+        
+        // Si es una petición AJAX/API, devolver JSON
+        if (request()->expectsJson()) {
+            return response()->json($client);
+        }
+        
+        return Inertia::render('Clients/Show', [
+            'client' => $client,
+        ]);
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(Client $client)
+    {
+        $client->load('addresses');
+        
+        return Inertia::render('Clients/Edit', [
+            'client' => $client,
+        ]);
     }
 
     /**
@@ -52,13 +100,59 @@ class ClientController
      */
     public function update(Request $request, Client $client)
     {
-        $request->validate([
-            'ruc_dni' => 'sometimes|string|unique:clients,ruc_dni,' . $client->id,
-            'business_name' => 'sometimes|string|max:255',
+        $validated = $request->validate([
+            'business_name' => 'required|string|max:255',
+            'ruc' => 'required|string|max:20|unique:clients,ruc_dni,' . $client->id,
+            'email' => 'required|email|max:255',
+            'phone' => 'required|string|max:20',
         ]);
 
-        $client->update($request->only(['ruc_dni', 'business_name']));
+        // Mapear ruc a ruc_dni para actualizar en la BD
+        $data = $validated;
+        $data['ruc_dni'] = $validated['ruc'];
+        unset($data['ruc']);
 
-        return response()->json($client);
+        $client->update($data);
+
+        // Si es una petición AJAX/API, devolver JSON
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Cliente actualizado exitosamente',
+                'client' => $client
+            ]);
+        }
+
+        return redirect()->route('clients.index')
+            ->with('success', 'Cliente actualizado exitosamente');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(Client $client)
+    {
+        try {
+            $client->delete();
+            
+            // Si es una petición AJAX/API, devolver JSON
+            if (request()->expectsJson()) {
+                return response()->json([
+                    'message' => 'Cliente eliminado exitosamente'
+                ]);
+            }
+            
+            return redirect()->route('clients.index')
+                ->with('success', 'Cliente eliminado exitosamente');
+        } catch (\Exception $e) {
+            // Si es una petición AJAX/API, devolver error JSON
+            if (request()->expectsJson()) {
+                return response()->json([
+                    'message' => 'Error al eliminar el cliente: ' . $e->getMessage()
+                ], 500);
+            }
+            
+            return redirect()->route('clients.index')
+                ->with('error', 'Error al eliminar el cliente: ' . $e->getMessage());
+        }
     }
 }

@@ -4,12 +4,13 @@ namespace App\Http\Controllers\Auth;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
 
 class LoginController
 {
     public function showLoginForm()
     {
-        return view('auth.login');
+        return Inertia::render('Auth/Login');
     }
 
     public function login(Request $request)
@@ -19,7 +20,7 @@ class LoginController
             'password' => ['required'],
         ]);
 
-        if (Auth::attempt($credentials)) {
+        if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
 
             return redirect()->intended('/');

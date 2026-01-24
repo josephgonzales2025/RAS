@@ -1,3 +1,13 @@
+// Verificar token CSRF al cargar la página
+document.addEventListener('DOMContentLoaded', function() {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]');
+    if (!csrfToken) {
+        console.error('⚠️ TOKEN CSRF NO ENCONTRADO EN EL DOM');
+    } else {
+        console.log('✅ Token CSRF encontrado:', csrfToken.getAttribute('content').substring(0, 20) + '...');
+    }
+});
+
 // Función para cargar los despachos en la tabla
 function loadDispatches() {
     fetch('/api/dispatches')
@@ -133,65 +143,132 @@ function assignMerchandiseEntry() {
     const dispatchId = document.getElementById('assignModal').dataset.dispatchId;
     const merchandiseEntryId = document.getElementById('merchandiseEntrySelect').value;
 
-    fetch(`/api/dispatches/${dispatchId}/assign`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ merchandise_entry_id: merchandiseEntryId }),
+    console.log('📤 Obteniendo cookie CSRF de Sanctum...');
+
+    // Primero, obtener la cookie CSRF de Sanctum
+    fetch('/sanctum/csrf-cookie', {
+        credentials: 'same-origin'
     })
-        .then(response => response.json())
-        .then(data => {
-            alert('Registro asignado con éxito');
-            loadAssignedEntries(dispatchId); // Recargar los registros asignados
-            loadAvailableMerchandiseEntries(); // Recargar los números de guía disponibles
-            
-            // Guardar un indicador en localStorage
-            localStorage.setItem('reloadMerchandiseEntries', 'true');
-        })
-        .catch(error => console.error('Error al asignar el registro:', error));
+    .then(() => {
+        console.log('✅ Cookie CSRF obtenida');
+        
+        const csrfToken = document.querySelector('meta[name="csrf-token"]');
+        
+        if (!csrfToken) {
+            console.error('⚠️ ERROR: No se encuentra el token CSRF en el DOM');
+            alert('Error: Token CSRF no encontrado. Por favor, recarga la página.');
+            return Promise.reject('No CSRF token');
+        }
+
+        const tokenValue = csrfToken.getAttribute('content');
+        console.log('📤 Enviando petición POST a /api/dispatches/' + dispatchId + '/assign');
+        console.log('🔑 Token CSRF:', tokenValue.substring(0, 20) + '...');
+
+        return fetch(`/api/dispatches/${dispatchId}/assign`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': tokenValue,
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({ 
+                merchandise_entry_id: merchandiseEntryId
+            }),
+            credentials: 'same-origin'
+        });
+    })
+    .then(response => {
+        console.log('📥 Respuesta recibida:', response.status, response.statusText);
+        if (!response.ok) {
+            return response.text().then(text => {
+                console.error('❌ Error del servidor:', text);
+                throw new Error(`HTTP error! status: ${response.status} - ${text.substring(0, 100)}`);
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('✅ Éxito:', data);
+        alert('Registro asignado con éxito');
+        loadAssignedEntries(dispatchId);
+        loadAvailableMerchandiseEntries();
+        localStorage.setItem('reloadMerchandiseEntries', 'true');
+    })
+    .catch(error => {
+        console.error('💥 Error al asignar el registro:', error);
+        alert('Error al asignar el registro: ' + error.message);
+    });
 }
 
 function removeAssignedEntry(dispatchId, merchandiseEntryId) {
-    fetch(`/api/dispatches/${dispatchId}/remove/${merchandiseEntryId}`, {
-        method: 'DELETE',
+    console.log('📤 Obteniendo cookie CSRF de Sanctum...');
+
+    // Primero, obtener la cookie CSRF de Sanctum
+    fetch('/sanctum/csrf-cookie', {
+        credentials: 'same-origin'
     })
-        .then(async response => {
-            const contentType = response.headers.get("content-type");
+    .then(() => {
+        console.log('✅ Cookie CSRF obtenida');
+        
+        const csrfToken = document.querySelector('meta[name="csrf-token"]');
+        
+        if (!csrfToken) {
+            console.error('⚠️ ERROR: No se encuentra el token CSRF en el DOM');
+            alert('Error: Token CSRF no encontrado. Por favor, recarga la página.');
+            return Promise.reject('No CSRF token');
+        }
 
-            if (!response.ok) {
-                // Si es JSON, mostrar el mensaje del backend
-                if (contentType && contentType.includes("application/json")) {
-                    const errorData = await response.json();
-                    alert(`Error: ${errorData.message || 'Error desconocido'}`);
-                    console.error("Detalles:", errorData);
-                }
-                // Si viene HTML (por ejemplo, un error del servidor como 500)
-                else if (contentType && contentType.includes("text/html")) {
-                    const errorHtml = await response.text();
-                    console.error("Error HTML recibido:", errorHtml);
-                    alert("Ocurrió un error interno del servidor (500)");
-                }
-                // Otros tipos de contenido no esperados
-                else {
-                    const errorText = await response.text();
-                    console.error("Respuesta no esperada:", errorText);
-                    alert("Error inesperado al procesar la solicitud.");
-                }
+        const tokenValue = csrfToken.getAttribute('content');
+        console.log('📤 Enviando petición DELETE a /api/dispatches/' + dispatchId + '/remove/' + merchandiseEntryId);
+        console.log('🔑 Token CSRF:', tokenValue.substring(0, 20) + '...');
 
-                return;
+        return fetch(`/api/dispatches/${dispatchId}/remove/${merchandiseEntryId}`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': tokenValue,
+                'Accept': 'application/json',
+            },
+            credentials: 'same-origin'
+        });
+    })
+    .then(async response => {
+        console.log('📥 Respuesta recibida:', response.status, response.statusText);
+        const contentType = response.headers.get("content-type");
+
+        if (!response.ok) {
+            console.error('❌ Error en la respuesta:', response.status);
+            // Si es JSON, mostrar el mensaje del backend
+            if (contentType && contentType.includes("application/json")) {
+                const errorData = await response.json();
+                alert(`Error: ${errorData.message || 'Error desconocido'}`);
+                console.error("Detalles:", errorData);
+            }
+            // Si viene HTML (por ejemplo, un error del servidor como 500)
+            else if (contentType && contentType.includes("text/html")) {
+                const errorHtml = await response.text();
+                console.error("Error HTML recibido:", errorHtml);
+                alert("Ocurrió un error interno del servidor (500)");
+            }
+            // Otros tipos de contenido no esperados
+            else {
+                const errorText = await response.text();
+                console.error("Respuesta no esperada:", errorText);
+                alert("Error inesperado al procesar la solicitud.");
             }
 
-            // Si fue exitoso
-            const data = await response.json();
-            alert(data.message);
-            loadAssignedEntries(dispatchId);
-            loadAvailableMerchandiseEntries();
-        })
-        .catch(error => {
-            console.error('Error de red o al eliminar el registro:', error);
-            alert('No se pudo eliminar el registro (error de red o servidor)');
-        });
+            return;
+        }
+
+        // Si fue exitoso
+        const data = await response.json();
+        alert(data.message);
+        loadAssignedEntries(dispatchId);
+        loadAvailableMerchandiseEntries();
+    })
+    .catch(error => {
+        console.error('💥 Error de red o al eliminar el registro:', error);
+        alert('No se pudo eliminar el registro: ' + error.message);
+    });
 }
 
 function openProductModalD(merchandiseEntryId) {

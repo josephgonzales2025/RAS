@@ -4,15 +4,24 @@ namespace App\Http\Controllers;
 
 use App\Models\MerchandiseEntry;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class MerchandiseEntryController
 {
     /**
-     * Display a listing of the resource.
+     * Display a listing of the resource for Inertia view.
+     */
+    public function indexView()
+    {
+        return Inertia::render('MerchandiseEntries/Index');
+    }
+
+    /**
+     * Display a listing of the resource for API.
      */
     public function index()
     {
-        $entries = MerchandiseEntry::where('status', 'Pending')->with(['supplier', 'client', 'clientAddress'])->orderBy('created_at', 'desc')->get();
+        $entries = MerchandiseEntry::with(['supplier', 'client', 'clientAddress', 'products'])->orderBy('id', 'desc')->get();
         return response()->json($entries);
     }
     
