@@ -6,6 +6,7 @@ import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
 import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
+import Pagination from '@/Components/Pagination';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import { confirmAlert, successAlert, errorAlert } from '@/utils/alerts';
 
@@ -15,6 +16,10 @@ export default function Index({ clients }) {
     const [showEditModal, setShowEditModal] = useState(false);
     const [editingClient, setEditingClient] = useState(null);
     const [addresses, setAddresses] = useState([]);
+
+    // Extract data and pagination from clients prop
+    const clientsData = clients.data || clients;
+    const paginationLinks = clients.links || null;
 
     const { data: createData, setData: setCreateData, post, processing: creating, errors: createErrors, reset: resetCreate } = useForm({
         business_name: '',
@@ -165,11 +170,18 @@ export default function Index({ clients }) {
         });
     };
 
-    const filteredClients = clients.filter(client =>
+    const filteredClients = clientsData.filter(client =>
         client.business_name.toLowerCase().includes(search.toLowerCase()) ||
         client.ruc.includes(search) ||
         (client.email && client.email.toLowerCase().includes(search.toLowerCase()))
     );
+
+    const handlePageChange = (url) => {
+        router.visit(url, {
+            preserveScroll: true,
+            preserveState: true,
+        });
+    };
 
     return (
         <AuthenticatedLayout
@@ -316,11 +328,18 @@ export default function Index({ clients }) {
                                 </table>
                             </div>
 
-                            {filteredClients.length > 0 && (
+                            {/* Pagination */}
+                            {paginationLinks && !search && (
+                                <Pagination
+                                    links={paginationLinks}
+                                    onPageChange={handlePageChange}
+                                />
+                            )}
+
+                            {filteredClients.length > 0 && search && (
                                 <div className="bg-gray-50 px-6 py-3 border-t border-gray-200">
                                     <div className="text-sm text-gray-700">
-                                        Mostrando <span className="font-medium">{filteredClients.length}</span> de{' '}
-                                        <span className="font-medium">{clients.length}</span> clientes
+                                        Mostrando <span className="font-medium">{filteredClients.length}</span> resultados
                                     </div>
                                 </div>
                             )}
