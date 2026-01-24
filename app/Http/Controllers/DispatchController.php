@@ -30,6 +30,13 @@ class DispatchController
         
         $dispatches = $query->orderBy('id', 'desc')->paginate(15)->withQueryString();
         
+        // Agregar totales de peso y flete a cada despacho
+        $dispatches->getCollection()->transform(function ($dispatch) {
+            $dispatch->total_weight = $dispatch->merchandiseEntries->sum('total_weight');
+            $dispatch->total_freight = $dispatch->merchandiseEntries->sum('total_freight');
+            return $dispatch;
+        });
+        
         return Inertia::render('Dispatches/Index', [
             'dispatches' => $dispatches,
             'filters' => $request->only('search')
@@ -54,6 +61,14 @@ class DispatchController
         }
         
         $dispatches = $query->orderBy('id', 'desc')->paginate(15)->withQueryString();
+        
+        // Agregar totales de peso y flete a cada despacho
+        $dispatches->getCollection()->transform(function ($dispatch) {
+            $dispatch->total_weight = $dispatch->merchandiseEntries->sum('total_weight');
+            $dispatch->total_freight = $dispatch->merchandiseEntries->sum('total_freight');
+            return $dispatch;
+        });
+        
         return response()->json($dispatches);
     }
 

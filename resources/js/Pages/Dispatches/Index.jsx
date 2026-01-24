@@ -463,9 +463,9 @@ export default function Index({ auth, dispatches: dispatchesProp, filters = {} }
                                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
                                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
                                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Conductor</th>
-                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Licencia</th>
                                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Empresa</th>
-                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">RUC Empresa</th>
+                                                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Peso Total (kg)</th>
+                                                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Flete Total (S/.)</th>
                                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Entradas</th>
                                                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
                                             </tr>
@@ -485,9 +485,19 @@ export default function Index({ auth, dispatches: dispatchesProp, filters = {} }
                                                             {formatDateForDisplay(dispatch.dispatch_date)}
                                                         </td>
                                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{dispatch.driver_name}</td>
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{dispatch.driver_license}</td>
                                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{dispatch.transport_company_name}</td>
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{dispatch.transport_company_ruc}</td>
+                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                                                            {new Intl.NumberFormat('es-PE', {
+                                                                minimumFractionDigits: 2,
+                                                                maximumFractionDigits: 2
+                                                            }).format(dispatch.total_weight || 0)}
+                                                        </td>
+                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                                                            S/. {new Intl.NumberFormat('es-PE', {
+                                                                minimumFractionDigits: 2,
+                                                                maximumFractionDigits: 2
+                                                            }).format(dispatch.total_freight || 0)}
+                                                        </td>
                                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                                             <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
                                                                 {dispatch.merchandiseEntries?.length || 0}
