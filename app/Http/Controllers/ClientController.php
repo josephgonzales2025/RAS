@@ -14,7 +14,7 @@ class ClientController
      */
     public function index()
     {
-        $clients = Client::with('addresses')->orderBy('id', 'desc')->get();
+        $clients = Client::with('addresses')->orderBy('id', 'desc')->paginate(15);
         
         return Inertia::render('Clients/Index', [
             'clients' => $clients,
@@ -26,7 +26,7 @@ class ClientController
      */
     public function apiIndex()
     {
-        $clients = Client::with('addresses')->orderBy('id', 'desc')->get();
+        $clients = Client::with('addresses')->orderBy('id', 'desc')->paginate(15);
         return response()->json($clients);
     }
 

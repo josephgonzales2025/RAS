@@ -7,8 +7,9 @@ export const merchandiseEntryService = {
   /**
    * Get all merchandise entries
    */
-  async getAll(): Promise<MerchandiseEntry[]> {
-    const response = await axios.get<MerchandiseEntry[]>(API_BASE_URL);
+  async getAll(url: string | null = null): Promise<any> {
+    const requestUrl = url || API_BASE_URL;
+    const response = await axios.get(requestUrl);
     return response.data;
   },
 

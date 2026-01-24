@@ -21,7 +21,7 @@ class MerchandiseEntryController
      */
     public function index()
     {
-        $entries = MerchandiseEntry::with(['supplier', 'client', 'clientAddress', 'products'])->orderBy('id', 'desc')->get();
+        $entries = MerchandiseEntry::with(['supplier', 'client', 'clientAddress', 'products'])->orderBy('id', 'desc')->paginate(15);
         return response()->json($entries);
     }
     

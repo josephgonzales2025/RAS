@@ -7,8 +7,9 @@ export const dispatchService = {
   /**
    * Get all dispatches
    */
-  async getAll(): Promise<Dispatch[]> {
-    const response = await axios.get<Dispatch[]>(API_BASE_URL);
+  async getAll(url: string | null = null): Promise<any> {
+    const requestUrl = url || API_BASE_URL;
+    const response = await axios.get(requestUrl);
     return response.data;
   },
 

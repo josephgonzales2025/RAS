@@ -16,7 +16,7 @@ class SupplierController
      */
     public function index() : Response
     {
-        $suppliers = Supplier::orderBy('id', 'desc')->get();
+        $suppliers = Supplier::orderBy('id', 'desc')->paginate(15);
         return Inertia::render('Suppliers/Index', [
             'suppliers' => $suppliers
         ]);
@@ -27,7 +27,7 @@ class SupplierController
      */
     public function apiIndex() : JsonResponse
     {
-        $suppliers = Supplier::orderBy('id', 'desc')->get();
+        $suppliers = Supplier::orderBy('id', 'desc')->paginate(15);
         return new JsonResponse($suppliers);
     }
 

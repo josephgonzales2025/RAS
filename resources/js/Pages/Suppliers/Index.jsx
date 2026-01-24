@@ -4,9 +4,11 @@ import { Head } from '@inertiajs/react';
 import { supplierService } from '@/services/supplierService';
 import { PencilIcon, TrashIcon, PlusIcon } from '@heroicons/react/24/outline';
 import { confirmAlert, successAlert, errorAlert } from '@/utils/alerts';
+import Pagination from '@/Components/Pagination';
 
 export default function Index({ auth }) {
     const [suppliers, setSuppliers] = useState([]);
+    const [paginationData, setPaginationData] = useState(null);
     const [filteredSuppliers, setFilteredSuppliers] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [loading, setLoading] = useState(true);
@@ -35,14 +37,28 @@ export default function Index({ auth }) {
         }
     }, [searchTerm, suppliers]);
 
-    const loadSuppliers = async () => {
+    const loadSuppliers = async (url = null) => {
         try {
             setLoading(true);
-            const data = await supplierService.getAll();
-            // Sort suppliers by ID in descending order (newest first)
-            const sortedData = data.sort((a, b) => b.id - a.id);
-            setSuppliers(sortedData);
-            setFilteredSuppliers(sortedData);
+            const response = await supplierService.getAll(url);
+            // Check if response is paginated
+            if (response.data) {
+                setSuppliers(response.data);
+                setFilteredSuppliers(response.data);
+                setPaginationData({
+                    links: response.links,
+                    current_page: response.current_page,
+                    last_page: response.last_page,
+                    per_page: response.per_page,
+                    total: response.total
+                });
+            } else {
+                // Fallback for non-paginated response
+                const sortedData = response.sort((a, b) => b.id - a.id);
+                setSuppliers(sortedData);
+                setFilteredSuppliers(sortedData);
+                setPaginationData(null);
+            }
             setError(null);
         } catch (err) {
             setError('Error al cargar proveedores');
@@ -50,6 +66,10 @@ export default function Index({ auth }) {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handlePageChange = (url) => {
+        loadSuppliers(url);
     };
 
     const handleOpenModal = (supplier = null) => {
@@ -277,6 +297,14 @@ export default function Index({ auth }) {
                                         </tbody>
                                     </table>
                                 </div>
+                            )}
+
+                            {/* Pagination */}
+                            {paginationData && !searchTerm && (
+                                <Pagination
+                                    links={paginationData.links}
+                                    onPageChange={handlePageChange}
+                                />
                             )}
                         </div>
                     </div>

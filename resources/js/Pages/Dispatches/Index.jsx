@@ -7,9 +7,11 @@ import { dispatchService } from '@/services/dispatchService';
 import { merchandiseEntryService } from '@/services/merchandiseEntryService';
 import { PencilIcon, TrashIcon, PlusIcon, EyeIcon, DocumentTextIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 import { confirmAlert, successAlert, errorAlert, warningAlert } from '@/utils/alerts';
+import Pagination from '@/Components/Pagination';
 
 export default function Index({ auth }) {
     const [dispatches, setDispatches] = useState([]);
+    const [paginationData, setPaginationData] = useState(null);
     const [filteredDispatches, setFilteredDispatches] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [loading, setLoading] = useState(true);
@@ -53,13 +55,26 @@ export default function Index({ auth }) {
         }
     }, [searchTerm, dispatches]);
 
-    const loadDispatches = async () => {
+    const loadDispatches = async (url = null) => {
         try {
             setLoading(true);
-            const data = await dispatchService.getAll();
-            const sortedData = data.sort((a, b) => b.id - a.id);
-            setDispatches(sortedData);
-            setFilteredDispatches(sortedData);
+            const response = await dispatchService.getAll(url);
+            if (response.data) {
+                setDispatches(response.data);
+                setFilteredDispatches(response.data);
+                setPaginationData({
+                    links: response.links,
+                    current_page: response.current_page,
+                    last_page: response.last_page,
+                    per_page: response.per_page,
+                    total: response.total
+                });
+            } else {
+                const sortedData = response.sort((a, b) => b.id - a.id);
+                setDispatches(sortedData);
+                setFilteredDispatches(sortedData);
+                setPaginationData(null);
+            }
             setError(null);
         } catch (err) {
             setError('Error al cargar despachos');
@@ -67,6 +82,10 @@ export default function Index({ auth }) {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handlePageChange = (url) => {
+        loadDispatches(url);
     };
 
     const loadPendingEntries = async () => {
@@ -521,6 +540,14 @@ export default function Index({ auth }) {
                                         </tbody>
                                     </table>
                                 </div>
+                            )}
+
+                            {/* Pagination */}
+                            {paginationData && !searchTerm && (
+                                <Pagination
+                                    links={paginationData.links}
+                                    onPageChange={handlePageChange}
+                                />
                             )}
                         </div>
                     </div>

@@ -9,6 +9,7 @@ import { supplierService } from '@/services/supplierService';
 import { dispatchService } from '@/services/dispatchService';
 import { PencilIcon, TrashIcon, PlusIcon, EyeIcon } from '@heroicons/react/24/outline';
 import { confirmAlert, successAlert, errorAlert, warningAlert } from '@/utils/alerts';
+import Pagination from '@/Components/Pagination';
 
 // Helper function to get today's date in local timezone
 const getTodayLocalDate = () => {
@@ -42,6 +43,7 @@ const formatDateForDisplay = (dateString) => {
 
 export default function Index({ auth }) {
     const [entries, setEntries] = useState([]);
+    const [paginationData, setPaginationData] = useState(null);
     const [filteredEntries, setFilteredEntries] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [loading, setLoading] = useState(true);
@@ -98,15 +100,31 @@ export default function Index({ auth }) {
         }
     }, [searchTerm, entries]);
 
-    const loadEntries = async () => {
+    const loadEntries = async (url = null) => {
         try {
             setLoading(true);
-            const data = await merchandiseEntryService.getAll();
-            // Filtrar solo entradas con estado Pending
-            const pendingData = data.filter(entry => entry.status === 'Pending');
-            const sortedData = pendingData.sort((a, b) => b.id - a.id);
-            setEntries(sortedData);
-            setFilteredEntries(sortedData);
+            const response = await merchandiseEntryService.getAll(url);
+            let pendingData;
+            
+            if (response.data) {
+                // Filtrar solo entradas con estado Pending
+                pendingData = response.data.filter(entry => entry.status === 'Pending');
+                setEntries(pendingData);
+                setFilteredEntries(pendingData);
+                setPaginationData({
+                    links: response.links,
+                    current_page: response.current_page,
+                    last_page: response.last_page,
+                    per_page: response.per_page,
+                    total: response.total
+                });
+            } else {
+                pendingData = response.filter(entry => entry.status === 'Pending');
+                const sortedData = pendingData.sort((a, b) => b.id - a.id);
+                setEntries(sortedData);
+                setFilteredEntries(sortedData);
+                setPaginationData(null);
+            }
             setError(null);
         } catch (err) {
             setError('Error al cargar entradas de mercadería');
@@ -114,6 +132,10 @@ export default function Index({ auth }) {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handlePageChange = (url) => {
+        loadEntries(url);
     };
 
     const loadSuppliers = async () => {
@@ -737,6 +759,14 @@ export default function Index({ auth }) {
                                         </tbody>
                                     </table>
                                 </div>
+                            )}
+
+                            {/* Pagination */}
+                            {paginationData && !searchTerm && (
+                                <Pagination
+                                    links={paginationData.links}
+                                    onPageChange={handlePageChange}
+                                />
                             )}
                         </div>
                     </div>

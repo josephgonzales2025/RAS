@@ -24,7 +24,7 @@ class DispatchController
      */
     public function index()
     {
-        $dispatches = Dispatch::with('merchandiseEntries.client', 'merchandiseEntries.supplier', 'merchandiseEntries.clientAddress')->orderBy('id', 'desc')->get();
+        $dispatches = Dispatch::with('merchandiseEntries.client', 'merchandiseEntries.supplier', 'merchandiseEntries.clientAddress')->orderBy('id', 'desc')->paginate(15);
         return response()->json($dispatches);
     }
 
