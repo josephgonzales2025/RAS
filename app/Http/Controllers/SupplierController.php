@@ -20,10 +20,10 @@ class SupplierController
         $query = Supplier::query();
         
         if ($request->has('search')) {
-            $search = $request->input('search');
+            $search = strtolower($request->input('search'));
             $query->where(function($q) use ($search) {
-                $q->where('ruc_dni', 'like', "%{$search}%")
-                  ->orWhere('business_name', 'like', "%{$search}%");
+                $q->whereRaw('LOWER(ruc_dni) like ?', ["%{$search}%"])
+                  ->orWhereRaw('LOWER(business_name) like ?', ["%{$search}%"]);
             });
         }
         
@@ -42,10 +42,10 @@ class SupplierController
         $query = Supplier::query();
         
         if ($request->has('search')) {
-            $search = $request->input('search');
+            $search = strtolower($request->input('search'));
             $query->where(function($q) use ($search) {
-                $q->where('ruc_dni', 'like', "%{$search}%")
-                  ->orWhere('business_name', 'like', "%{$search}%");
+                $q->whereRaw('LOWER(ruc_dni) like ?', ["%{$search}%"])
+                  ->orWhereRaw('LOWER(business_name) like ?', ["%{$search}%"]);
             });
         }
         
