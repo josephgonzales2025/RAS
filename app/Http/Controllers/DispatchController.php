@@ -98,8 +98,15 @@ class DispatchController
      */
     public function destroy(Dispatch $dispatch)
     {
-        // Las entradas asociadas volverán a estado Pending automáticamente
-        // debido a la configuración de la base de datos (onDelete cascade o null)
+        // Actualizar todas las entradas de mercadería asociadas a estado Pending
+        // y quitar la referencia al despacho
+        MerchandiseEntry::where('dispatch_id', $dispatch->id)
+            ->update([
+                'status' => 'Pending',
+                'dispatch_id' => null
+            ]);
+        
+        // Eliminar el despacho
         $dispatch->delete();
 
         return response()->json(['message' => 'Despacho eliminado con éxito']);
