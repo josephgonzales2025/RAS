@@ -250,10 +250,10 @@ export default function Index({ clients }) {
                                                 ID
                                             </th>
                                             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Razón Social
+                                                RUC
                                             </th>
                                             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                RUC
+                                                Razón Social
                                             </th>
                                             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                 Email
@@ -298,12 +298,12 @@ export default function Index({ clients }) {
                                                         #{client.id}
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap">
+                                                        <div className="text-sm text-gray-900">{client.ruc}</div>
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap">
                                                         <div className="text-sm font-medium text-gray-900">
                                                             {client.business_name}
                                                         </div>
-                                                    </td>
-                                                    <td className="px-6 py-4 whitespace-nowrap">
-                                                        <div className="text-sm text-gray-900">{client.ruc}</div>
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap">
                                                         <div className="text-sm text-gray-500">
