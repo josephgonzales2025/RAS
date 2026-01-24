@@ -9,6 +9,36 @@ import { PencilIcon, TrashIcon, PlusIcon, EyeIcon, DocumentTextIcon, ArrowDownTr
 import { confirmAlert, successAlert, errorAlert, warningAlert } from '@/utils/alerts';
 import Pagination from '@/Components/Pagination';
 
+// Helper function to get today's date in local timezone
+const getTodayLocalDate = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+};
+
+// Helper function to convert a date string from server to local date format
+const formatDateForInput = (dateString) => {
+    if (!dateString) return getTodayLocalDate();
+    // Parse the date as if it's in local timezone (not UTC)
+    const [year, month, day] = dateString.split('-');
+    return `${year}-${month}-${day}`;
+};
+
+// Helper function to format date for display in table
+const formatDateForDisplay = (dateString) => {
+    if (!dateString) return '';
+    // Parse the date components without timezone conversion
+    const [year, month, day] = dateString.split('-');
+    const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+    return date.toLocaleDateString('es-PE', { 
+        day: '2-digit', 
+        month: '2-digit', 
+        year: 'numeric' 
+    });
+};
+
 export default function Index({ auth, dispatches: dispatchesProp, filters = {} }) {
     const dispatchesData = dispatchesProp.data || dispatchesProp;
     const [searchTerm, setSearchTerm] = useState(filters.search || '');
@@ -27,7 +57,7 @@ export default function Index({ auth, dispatches: dispatchesProp, filters = {} }
     const [selectedZones, setSelectedZones] = useState([]);
     
     const [formData, setFormData] = useState({
-        dispatch_date: new Date().toISOString().split('T')[0],
+        dispatch_date: getTodayLocalDate(),
         driver_name: '',
         driver_license: '',
         transport_company_name: '',
@@ -84,7 +114,7 @@ export default function Index({ auth, dispatches: dispatchesProp, filters = {} }
         if (dispatch) {
             setEditingDispatch(dispatch);
             setFormData({
-                dispatch_date: dispatch.dispatch_date,
+                dispatch_date: formatDateForInput(dispatch.dispatch_date),
                 driver_name: dispatch.driver_name,
                 driver_license: dispatch.driver_license,
                 transport_company_name: dispatch.transport_company_name,
@@ -93,7 +123,7 @@ export default function Index({ auth, dispatches: dispatchesProp, filters = {} }
         } else {
             setEditingDispatch(null);
             setFormData({
-                dispatch_date: new Date().toISOString().split('T')[0],
+                dispatch_date: getTodayLocalDate(),
                 driver_name: '',
                 driver_license: '',
                 transport_company_name: '',
@@ -108,7 +138,7 @@ export default function Index({ auth, dispatches: dispatchesProp, filters = {} }
         setShowModal(false);
         setEditingDispatch(null);
         setFormData({
-            dispatch_date: new Date().toISOString().split('T')[0],
+            dispatch_date: getTodayLocalDate(),
             driver_name: '',
             driver_license: '',
             transport_company_name: '',
@@ -451,7 +481,7 @@ export default function Index({ auth, dispatches: dispatchesProp, filters = {} }
                                                     <tr key={dispatch.id} className="hover:bg-gray-50">
                                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{index + 1}</td>
                                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                            {new Date(dispatch.dispatch_date).toLocaleDateString()}
+                                                            {formatDateForDisplay(dispatch.dispatch_date)}
                                                         </td>
                                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{dispatch.driver_name}</td>
                                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{dispatch.driver_license}</td>
@@ -675,7 +705,7 @@ export default function Index({ auth, dispatches: dispatchesProp, filters = {} }
                         <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-6xl sm:w-full">
                             <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                                 <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
-                                    Gestionar Entradas - Despacho del {selectedDispatch && new Date(selectedDispatch.dispatch_date).toLocaleDateString()}
+                                    Gestionar Entradas - Despacho del {selectedDispatch && formatDateForDisplay(selectedDispatch.dispatch_date)}
                                 </h3>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -776,7 +806,7 @@ export default function Index({ auth, dispatches: dispatchesProp, filters = {} }
                         <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
                             <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                                 <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
-                                    Entradas del Despacho - {selectedDispatch && new Date(selectedDispatch.dispatch_date).toLocaleDateString()}
+                                    Entradas del Despacho - {selectedDispatch && formatDateForDisplay(selectedDispatch.dispatch_date)}
                                 </h3>
 
                                 <div className="overflow-x-auto">
