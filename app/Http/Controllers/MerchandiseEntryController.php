@@ -21,10 +21,12 @@ class MerchandiseEntryController
             $query->where(function($q) use ($search) {
                 $q->where('guide_number', 'like', "%{$search}%")
                   ->orWhereHas('supplier', function($q) use ($search) {
-                      $q->where('business_name', 'like', "%{$search}%");
+                      $q->where('business_name', 'like', "%{$search}%")
+                        ->orWhere('ruc_dni', 'like', "%{$search}%");
                   })
                   ->orWhereHas('client', function($q) use ($search) {
-                      $q->where('business_name', 'like', "%{$search}%");
+                      $q->where('business_name', 'like', "%{$search}%")
+                        ->orWhere('ruc_dni', 'like', "%{$search}%");
                   });
             });
         }
@@ -50,10 +52,12 @@ class MerchandiseEntryController
             $query->where(function($q) use ($search) {
                 $q->where('guide_number', 'like', "%{$search}%")
                   ->orWhereHas('supplier', function($q) use ($search) {
-                      $q->where('business_name', 'like', "%{$search}%");
+                      $q->where('business_name', 'like', "%{$search}%")
+                        ->orWhere('ruc_dni', 'like', "%{$search}%");
                   })
                   ->orWhereHas('client', function($q) use ($search) {
-                      $q->where('business_name', 'like', "%{$search}%");
+                      $q->where('business_name', 'like', "%{$search}%")
+                        ->orWhere('ruc_dni', 'like', "%{$search}%");
                   });
             });
         }

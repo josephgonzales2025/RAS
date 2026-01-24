@@ -20,7 +20,7 @@ class ClientController
             $search = $request->input('search');
             $query->where(function($q) use ($search) {
                 $q->where('business_name', 'like', "%{$search}%")
-                  ->orWhere('ruc', 'like', "%{$search}%")
+                  ->orWhere('ruc_dni', 'like', "%{$search}%")
                   ->orWhere('email', 'like', "%{$search}%");
             });
         }
@@ -44,7 +44,7 @@ class ClientController
             $search = $request->input('search');
             $query->where(function($q) use ($search) {
                 $q->where('business_name', 'like', "%{$search}%")
-                  ->orWhere('ruc', 'like', "%{$search}%")
+                  ->orWhere('ruc_dni', 'like', "%{$search}%")
                   ->orWhere('email', 'like', "%{$search}%");
             });
         }
