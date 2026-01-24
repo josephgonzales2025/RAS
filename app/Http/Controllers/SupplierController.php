@@ -54,6 +54,15 @@ class SupplierController
     }
 
     /**
+     * Get all suppliers without pagination (for selects).
+     */
+    public function allSuppliers() : JsonResponse
+    {
+        $suppliers = Supplier::orderBy('business_name', 'asc')->get();
+        return new JsonResponse($suppliers);
+    }
+
+    /**
      * Store a newly created resource in storage.
      */
     public function store(StoreSupplierRequest $request) : JsonResponse

@@ -102,9 +102,9 @@ export default function Index({ auth, entries: entriesProp, filters = {} }) {
 
     const loadSuppliers = async () => {
         try {
-            const response = await supplierService.getAll();
-            // Si la respuesta es un array, usarlo directamente; sino, extraer el array de data
-            const suppliersData = Array.isArray(response) ? response : (response.data || []);
+            const response = await axios.get('/api/suppliers/all/list');
+            // La respuesta debe ser un array directo
+            const suppliersData = Array.isArray(response.data) ? response.data : (response.data.data || []);
             setSuppliers(suppliersData);
             // Convert to react-select format
             const options = suppliersData.map(supplier => ({
@@ -119,8 +119,8 @@ export default function Index({ auth, entries: entriesProp, filters = {} }) {
 
     const loadClients = async () => {
         try {
-            const response = await axios.get('/api/clients');
-            // response.data puede ser un objeto paginado o un array
+            const response = await axios.get('/api/clients/all/list');
+            // La respuesta debe ser un array directo
             const clientsData = Array.isArray(response.data) ? response.data : (response.data.data || []);
             setClients(clientsData);
             // Convert to react-select format

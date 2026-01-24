@@ -54,6 +54,15 @@ class ClientController
     }
 
     /**
+     * Get all clients without pagination (for selects).
+     */
+    public function allClients()
+    {
+        $clients = Client::orderBy('business_name', 'asc')->get();
+        return response()->json($clients);
+    }
+
+    /**
      * Show the form for creating a new resource.
      */
     public function create()

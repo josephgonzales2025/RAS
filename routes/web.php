@@ -28,6 +28,7 @@ Route::middleware('auth')->group(function () {
     Route::prefix('api')->group(function () {
         // Clients API
         Route::get('/clients', [\App\Http\Controllers\ClientController::class, 'apiIndex']);
+        Route::get('/clients/all/list', [\App\Http\Controllers\ClientController::class, 'allClients']);
         Route::post('/clients', [\App\Http\Controllers\ClientController::class, 'store'])->name('clients.store');
         Route::get('/clients/{client}', [\App\Http\Controllers\ClientController::class, 'show'])->name('clients.show');
         Route::put('/clients/{client}', [\App\Http\Controllers\ClientController::class, 'update'])->name('clients.update');
@@ -42,6 +43,7 @@ Route::middleware('auth')->group(function () {
         
         // Suppliers API
         Route::get('/suppliers', [\App\Http\Controllers\SupplierController::class, 'apiIndex']);
+        Route::get('/suppliers/all/list', [\App\Http\Controllers\SupplierController::class, 'allSuppliers']);
         Route::post('/suppliers', [\App\Http\Controllers\SupplierController::class, 'store']);
         Route::get('/suppliers/{supplier}', [\App\Http\Controllers\SupplierController::class, 'show']);
         Route::put('/suppliers/{supplier}', [\App\Http\Controllers\SupplierController::class, 'update']);
