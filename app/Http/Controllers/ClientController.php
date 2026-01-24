@@ -12,21 +12,44 @@ class ClientController
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $clients = Client::with('addresses')->orderBy('id', 'desc')->paginate(15);
+        $query = Client::with('addresses');
+        
+        if ($request->has('search')) {
+            $search = $request->input('search');
+            $query->where(function($q) use ($search) {
+                $q->where('business_name', 'like', "%{$search}%")
+                  ->orWhere('ruc', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+        
+        $clients = $query->orderBy('id', 'desc')->paginate(15)->withQueryString();
         
         return Inertia::render('Clients/Index', [
             'clients' => $clients,
+            'filters' => $request->only('search')
         ]);
     }
 
     /**
      * Display a listing of the resource for API.
      */
-    public function apiIndex()
+    public function apiIndex(Request $request)
     {
-        $clients = Client::with('addresses')->orderBy('id', 'desc')->paginate(15);
+        $query = Client::with('addresses');
+        
+        if ($request->has('search')) {
+            $search = $request->input('search');
+            $query->where(function($q) use ($search) {
+                $q->where('business_name', 'like', "%{$search}%")
+                  ->orWhere('ruc', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+        
+        $clients = $query->orderBy('id', 'desc')->paginate(15)->withQueryString();
         return response()->json($clients);
     }
 

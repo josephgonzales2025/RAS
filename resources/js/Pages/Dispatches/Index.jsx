@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import axios from 'axios';
 import Select from 'react-select';
 import { dispatchService } from '@/services/dispatchService';
@@ -9,12 +9,10 @@ import { PencilIcon, TrashIcon, PlusIcon, EyeIcon, DocumentTextIcon, ArrowDownTr
 import { confirmAlert, successAlert, errorAlert, warningAlert } from '@/utils/alerts';
 import Pagination from '@/Components/Pagination';
 
-export default function Index({ auth }) {
-    const [dispatches, setDispatches] = useState([]);
-    const [paginationData, setPaginationData] = useState(null);
-    const [filteredDispatches, setFilteredDispatches] = useState([]);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [loading, setLoading] = useState(true);
+export default function Index({ auth, dispatches: dispatchesProp, filters = {} }) {
+    const dispatchesData = dispatchesProp.data || dispatchesProp;
+    const [searchTerm, setSearchTerm] = useState(filters.search || '');
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [showAssignModal, setShowAssignModal] = useState(false);
@@ -38,54 +36,23 @@ export default function Index({ auth }) {
     const [formErrors, setFormErrors] = useState({});
 
     useEffect(() => {
-        loadDispatches();
         loadPendingEntries();
     }, []);
 
     useEffect(() => {
-        if (searchTerm.trim() === '') {
-            setFilteredDispatches(dispatches);
-        } else {
-            const filtered = dispatches.filter(dispatch =>
-                dispatch.driver_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                dispatch.transport_company_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                dispatch.transport_company_ruc.includes(searchTerm)
-            );
-            setFilteredDispatches(filtered);
-        }
-    }, [searchTerm, dispatches]);
+        // Debounce search
+        const timer = setTimeout(() => {
+            router.get(route('dispatches.index'), { search: searchTerm }, {
+                preserveState: true,
+                replace: true
+            });
+        }, 500);
 
-    const loadDispatches = async (url = null) => {
-        try {
-            setLoading(true);
-            const response = await dispatchService.getAll(url);
-            if (response.data) {
-                setDispatches(response.data);
-                setFilteredDispatches(response.data);
-                setPaginationData({
-                    links: response.links,
-                    current_page: response.current_page,
-                    last_page: response.last_page,
-                    per_page: response.per_page,
-                    total: response.total
-                });
-            } else {
-                const sortedData = response.sort((a, b) => b.id - a.id);
-                setDispatches(sortedData);
-                setFilteredDispatches(sortedData);
-                setPaginationData(null);
-            }
-            setError(null);
-        } catch (err) {
-            setError('Error al cargar despachos');
-            console.error(err);
-        } finally {
-            setLoading(false);
-        }
-    };
+        return () => clearTimeout(timer);
+    }, [searchTerm]);
 
     const handlePageChange = (url) => {
-        loadDispatches(url);
+        router.visit(url);
     };
 
     const loadPendingEntries = async () => {
@@ -227,7 +194,7 @@ export default function Index({ auth }) {
                 successAlert('Creado', 'El despacho ha sido creado exitosamente');
             }
             
-            await loadDispatches();
+            router.reload();
             handleCloseModal();
         } catch (err) {
             if (err.response?.data?.errors) {
@@ -251,7 +218,7 @@ export default function Index({ auth }) {
 
         try {
             await dispatchService.delete(id);
-            await loadDispatches();
+            router.reload();
             await loadPendingEntries();
             successAlert('Eliminado', 'El despacho ha sido eliminado exitosamente');
         } catch (err) {
@@ -365,8 +332,7 @@ export default function Index({ auth }) {
         try {
             await dispatchService.assignBulk(selectedDispatch.id, selectedEntries);
             
-            // Recargar todos los datos en secuencia
-            await loadDispatches();
+            router.reload();
             
             // Esperar un momento para que la DB se actualice
             await new Promise(resolve => setTimeout(resolve, 300));
@@ -400,8 +366,7 @@ export default function Index({ auth }) {
             // Esperar un momento para que la DB se actualice
             await new Promise(resolve => setTimeout(resolve, 300));
             
-            // Recargar todos los datos en secuencia
-            await loadDispatches();
+            router.reload();
             const pendingData = await loadPendingEntries();
             const assignedData = await loadDispatchEntries(selectedDispatch.id);
             
@@ -475,14 +440,14 @@ export default function Index({ auth }) {
                                             </tr>
                                         </thead>
                                         <tbody className="bg-white divide-y divide-gray-200">
-                                            {filteredDispatches.length === 0 ? (
+                                            {dispatchesData.length === 0 ? (
                                                 <tr>
                                                     <td colSpan={8} className="px-6 py-4 text-center text-gray-500">
                                                         {searchTerm ? 'No se encontraron despachos' : 'No hay despachos registrados'}
                                                     </td>
                                                 </tr>
                                             ) : (
-                                                filteredDispatches.map((dispatch, index) => (
+                                                dispatchesData.map((dispatch, index) => (
                                                     <tr key={dispatch.id} className="hover:bg-gray-50">
                                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{index + 1}</td>
                                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -543,9 +508,9 @@ export default function Index({ auth }) {
                             )}
 
                             {/* Pagination */}
-                            {paginationData && !searchTerm && (
+                            {dispatchesProp.links && (
                                 <Pagination
-                                    links={paginationData.links}
+                                    links={dispatchesProp.links}
                                     onPageChange={handlePageChange}
                                 />
                             )}

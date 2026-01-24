@@ -26,8 +26,8 @@ Route::middleware('auth')->group(function () {
     // Rutas de vistas (Inertia)
     Route::get('/clients', [\App\Http\Controllers\ClientController::class, 'index'])->name('clients.index');
     Route::get('/suppliers', [\App\Http\Controllers\SupplierController::class, 'index'])->name('suppliers.index');
-    Route::get('/merchandise-entries', [\App\Http\Controllers\MerchandiseEntryController::class, 'indexView'])->name('merchandise-entries.index');
-    Route::get('/dispatches', [\App\Http\Controllers\DispatchController::class, 'indexView'])->name('dispatches.index');
+    Route::get('/merchandise-entries', [\App\Http\Controllers\MerchandiseEntryController::class, 'index'])->name('merchandise-entries.index');
+    Route::get('/dispatches', [\App\Http\Controllers\DispatchController::class, 'index'])->name('dispatches.index');
     
     // Rutas API con autenticación de sesión y CSRF
     Route::prefix('api')->group(function () {
@@ -53,7 +53,7 @@ Route::middleware('auth')->group(function () {
         Route::delete('/suppliers/{supplier}', [\App\Http\Controllers\SupplierController::class, 'destroy']);
         
         // Merchandise Entries API
-        Route::get('/merchandise-entries', [\App\Http\Controllers\MerchandiseEntryController::class, 'index']);
+        Route::get('/merchandise-entries', [\App\Http\Controllers\MerchandiseEntryController::class, 'apiIndex']);
         Route::post('/merchandise-entries', [\App\Http\Controllers\MerchandiseEntryController::class, 'store']);
         Route::get('/merchandise-entries/zones', [\App\Http\Controllers\MerchandiseEntryController::class, 'getZones']);
         Route::get('/merchandise-entries/{merchandiseEntry}', [\App\Http\Controllers\MerchandiseEntryController::class, 'show']);
@@ -68,7 +68,7 @@ Route::middleware('auth')->group(function () {
         Route::delete('/product-entries/{productEntry}', [\App\Http\Controllers\ProductEntryController::class, 'destroy']);
         
         // Dispatches API
-        Route::get('/dispatches', [\App\Http\Controllers\DispatchController::class, 'index']);
+        Route::get('/dispatches', [\App\Http\Controllers\DispatchController::class, 'apiIndex']);
         Route::post('/dispatches', [\App\Http\Controllers\DispatchController::class, 'store']);
         Route::get('/dispatches/{dispatch}', [\App\Http\Controllers\DispatchController::class, 'show']);
         Route::put('/dispatches/{dispatch}', [\App\Http\Controllers\DispatchController::class, 'update']);

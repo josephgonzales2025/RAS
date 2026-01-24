@@ -1,18 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import { supplierService } from '@/services/supplierService';
 import { PencilIcon, TrashIcon, PlusIcon } from '@heroicons/react/24/outline';
 import { confirmAlert, successAlert, errorAlert } from '@/utils/alerts';
 import Pagination from '@/Components/Pagination';
 
-export default function Index({ auth }) {
-    const [suppliers, setSuppliers] = useState([]);
-    const [paginationData, setPaginationData] = useState(null);
-    const [filteredSuppliers, setFilteredSuppliers] = useState([]);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+export default function Index({ auth, suppliers: suppliersProp, filters = {} }) {
+    const [search, setSearch] = useState(filters.search || '');
     const [showModal, setShowModal] = useState(false);
     const [editingSupplier, setEditingSupplier] = useState(null);
     const [formData, setFormData] = useState({
@@ -21,55 +16,30 @@ export default function Index({ auth }) {
     });
     const [formErrors, setFormErrors] = useState({});
 
-    useEffect(() => {
-        loadSuppliers();
-    }, []);
+    // Extract data and pagination from props
+    const suppliers = suppliersProp.data || suppliersProp;
+    const paginationLinks = suppliersProp.links || null;
 
     useEffect(() => {
-        if (searchTerm.trim() === '') {
-            setFilteredSuppliers(suppliers);
-        } else {
-            const filtered = suppliers.filter(supplier =>
-                supplier.ruc_dni.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                supplier.business_name.toLowerCase().includes(searchTerm.toLowerCase())
-            );
-            setFilteredSuppliers(filtered);
-        }
-    }, [searchTerm, suppliers]);
-
-    const loadSuppliers = async (url = null) => {
-        try {
-            setLoading(true);
-            const response = await supplierService.getAll(url);
-            // Check if response is paginated
-            if (response.data) {
-                setSuppliers(response.data);
-                setFilteredSuppliers(response.data);
-                setPaginationData({
-                    links: response.links,
-                    current_page: response.current_page,
-                    last_page: response.last_page,
-                    per_page: response.per_page,
-                    total: response.total
+        // Debounce search
+        const timer = setTimeout(() => {
+            if (search !== filters.search) {
+                router.get(route('suppliers.index'), { search }, {
+                    preserveState: true,
+                    preserveScroll: true,
+                    replace: true,
                 });
-            } else {
-                // Fallback for non-paginated response
-                const sortedData = response.sort((a, b) => b.id - a.id);
-                setSuppliers(sortedData);
-                setFilteredSuppliers(sortedData);
-                setPaginationData(null);
             }
-            setError(null);
-        } catch (err) {
-            setError('Error al cargar proveedores');
-            console.error(err);
-        } finally {
-            setLoading(false);
-        }
-    };
+        }, 500);
+
+        return () => clearTimeout(timer);
+    }, [search]);
 
     const handlePageChange = (url) => {
-        loadSuppliers(url);
+        router.visit(url, {
+            preserveScroll: true,
+            preserveState: true,
+        });
     };
 
     const handleOpenModal = (supplier = null) => {
@@ -127,13 +97,11 @@ export default function Index({ auth }) {
         try {
             if (editingSupplier) {
                 await supplierService.update(editingSupplier.id, formData);
-                await loadSuppliers();
+                router.reload({ only: ['suppliers'] });
                 successAlert('Actualizado', 'El proveedor ha sido actualizado exitosamente');
             } else {
-                const newSupplier = await supplierService.create(formData);
-                // Add new supplier at the beginning of the list
-                setSuppliers(prev => [newSupplier, ...prev]);
-                setFilteredSuppliers(prev => [newSupplier, ...prev]);
+                await supplierService.create(formData);
+                router.reload({ only: ['suppliers'] });
                 successAlert('Creado', 'El proveedor ha sido creado exitosamente');
             }
             handleCloseModal();
@@ -159,10 +127,9 @@ export default function Index({ auth }) {
 
         try {
             await supplierService.delete(id);
-            await loadSuppliers();
+            router.reload({ only: ['suppliers'] });
             successAlert('Eliminado', 'El proveedor ha sido eliminado exitosamente');
         } catch (err) {
-            setError('Error al eliminar el proveedor');
             errorAlert('Error', 'No se pudo eliminar el proveedor');
             console.error(err);
         }
@@ -184,7 +151,7 @@ export default function Index({ auth }) {
     };
 
     const handleSearchChange = (e) => {
-        setSearchTerm(e.target.value);
+        setSearch(e.target.value);
     };
 
     return (
@@ -217,28 +184,14 @@ export default function Index({ auth }) {
                                 <input
                                     type="text"
                                     placeholder="Buscar por RUC/DNI o Razón Social..."
-                                    value={searchTerm}
+                                    value={search}
                                     onChange={handleSearchChange}
                                     className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                 />
                             </div>
 
-                            {/* Error Message */}
-                            {error && (
-                                <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative">
-                                    {error}
-                                </div>
-                            )}
-
-                            {/* Loading State */}
-                            {loading ? (
-                                <div className="text-center py-8">
-                                    <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-                                    <p className="mt-2 text-gray-600">Cargando proveedores...</p>
-                                </div>
-                            ) : (
-                                /* Suppliers Table */
-                                <div className="overflow-x-auto">
+                            {/* Suppliers Table */}
+                            <div className="overflow-x-auto">
                                     <table className="min-w-full divide-y divide-gray-200">
                                         <thead className="bg-gray-50">
                                             <tr>
@@ -257,14 +210,14 @@ export default function Index({ auth }) {
                                             </tr>
                                         </thead>
                                         <tbody className="bg-white divide-y divide-gray-200">
-                                            {filteredSuppliers.length === 0 ? (
+                                            {suppliers.length === 0 ? (
                                                 <tr>
                                                     <td colSpan={4} className="px-6 py-4 text-center text-gray-500">
                                                         {searchTerm ? 'No se encontraron proveedores' : 'No hay proveedores registrados'}
                                                     </td>
                                                 </tr>
                                             ) : (
-                                                filteredSuppliers.map((supplier, index) => (
+                                                suppliers.map((supplier, index) => (
                                                     <tr key={supplier.id} className="hover:bg-gray-50">
                                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                                             {index + 1}
@@ -297,12 +250,11 @@ export default function Index({ auth }) {
                                         </tbody>
                                     </table>
                                 </div>
-                            )}
 
                             {/* Pagination */}
-                            {paginationData && !searchTerm && (
+                            {paginationLinks && !search && (
                                 <Pagination
-                                    links={paginationData.links}
+                                    links={paginationLinks}
                                     onPageChange={handlePageChange}
                                 />
                             )}

@@ -12,19 +12,48 @@ use Barryvdh\DomPDF\Facade\Pdf;
 class DispatchController
 {
     /**
-     * Display a listing of the resource for Inertia view.
+     * Display a listing of the resource.
      */
-    public function indexView()
+    public function index(Request $request)
     {
-        return Inertia::render('Dispatches/Index');
+        $query = Dispatch::with('merchandiseEntries.client', 'merchandiseEntries.supplier', 'merchandiseEntries.clientAddress');
+        
+        if ($request->has('search')) {
+            $search = $request->input('search');
+            $query->where(function($q) use ($search) {
+                $q->where('driver_name', 'like', "%{$search}%")
+                  ->orWhere('driver_license', 'like', "%{$search}%")
+                  ->orWhere('transport_company_name', 'like', "%{$search}%")
+                  ->orWhere('transport_company_ruc', 'like', "%{$search}%");
+            });
+        }
+        
+        $dispatches = $query->orderBy('id', 'desc')->paginate(15)->withQueryString();
+        
+        return Inertia::render('Dispatches/Index', [
+            'dispatches' => $dispatches,
+            'filters' => $request->only('search')
+        ]);
     }
 
     /**
-     * Muestra la lista de despachos.
+     * Get dispatches for API calls (used by other components).
      */
-    public function index()
+    public function apiIndex(Request $request)
     {
-        $dispatches = Dispatch::with('merchandiseEntries.client', 'merchandiseEntries.supplier', 'merchandiseEntries.clientAddress')->orderBy('id', 'desc')->paginate(15);
+        $query = Dispatch::with('merchandiseEntries.client', 'merchandiseEntries.supplier', 'merchandiseEntries.clientAddress');
+        
+        if ($request->has('search')) {
+            $search = $request->input('search');
+            $query->where(function($q) use ($search) {
+                $q->where('driver_name', 'like', "%{$search}%")
+                  ->orWhere('driver_license', 'like', "%{$search}%")
+                  ->orWhere('transport_company_name', 'like', "%{$search}%")
+                  ->orWhere('transport_company_ruc', 'like', "%{$search}%");
+            });
+        }
+        
+        $dispatches = $query->orderBy('id', 'desc')->paginate(15)->withQueryString();
         return response()->json($dispatches);
     }
 

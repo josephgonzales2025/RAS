@@ -6,6 +6,7 @@ use App\Http\Requests\StoreSupplierRequest;
 use App\Http\Requests\UpdateSupplierRequest;
 use App\Models\Supplier;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -14,20 +15,41 @@ class SupplierController
     /**
      * Display a listing of the resource.
      */
-    public function index() : Response
+    public function index(Request $request) : Response
     {
-        $suppliers = Supplier::orderBy('id', 'desc')->paginate(15);
+        $query = Supplier::query();
+        
+        if ($request->has('search')) {
+            $search = $request->input('search');
+            $query->where(function($q) use ($search) {
+                $q->where('ruc_dni', 'like', "%{$search}%")
+                  ->orWhere('business_name', 'like', "%{$search}%");
+            });
+        }
+        
+        $suppliers = $query->orderBy('id', 'desc')->paginate(15)->withQueryString();
         return Inertia::render('Suppliers/Index', [
-            'suppliers' => $suppliers
+            'suppliers' => $suppliers,
+            'filters' => $request->only('search')
         ]);
     }
 
     /**
      * Display a listing of the resource for API.
      */
-    public function apiIndex() : JsonResponse
+    public function apiIndex(Request $request) : JsonResponse
     {
-        $suppliers = Supplier::orderBy('id', 'desc')->paginate(15);
+        $query = Supplier::query();
+        
+        if ($request->has('search')) {
+            $search = $request->input('search');
+            $query->where(function($q) use ($search) {
+                $q->where('ruc_dni', 'like', "%{$search}%")
+                  ->orWhere('business_name', 'like', "%{$search}%");
+            });
+        }
+        
+        $suppliers = $query->orderBy('id', 'desc')->paginate(15)->withQueryString();
         return new JsonResponse($suppliers);
     }
 

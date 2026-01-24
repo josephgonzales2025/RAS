@@ -9,19 +9,56 @@ use Inertia\Inertia;
 class MerchandiseEntryController
 {
     /**
-     * Display a listing of the resource for Inertia view.
+     * Display a listing of the resource.
      */
-    public function indexView()
+    public function index(Request $request)
     {
-        return Inertia::render('MerchandiseEntries/Index');
+        $query = MerchandiseEntry::with(['supplier', 'client', 'clientAddress', 'products'])
+            ->where('status', 'Pending');
+        
+        if ($request->has('search')) {
+            $search = $request->input('search');
+            $query->where(function($q) use ($search) {
+                $q->where('guide_number', 'like', "%{$search}%")
+                  ->orWhereHas('supplier', function($q) use ($search) {
+                      $q->where('business_name', 'like', "%{$search}%");
+                  })
+                  ->orWhereHas('client', function($q) use ($search) {
+                      $q->where('business_name', 'like', "%{$search}%");
+                  });
+            });
+        }
+        
+        $entries = $query->orderBy('id', 'desc')->paginate(15)->withQueryString();
+        
+        return Inertia::render('MerchandiseEntries/Index', [
+            'entries' => $entries,
+            'filters' => $request->only('search')
+        ]);
     }
 
     /**
-     * Display a listing of the resource for API.
+     * Get entries for API calls (used by other components).
      */
-    public function index()
+    public function apiIndex(Request $request)
     {
-        $entries = MerchandiseEntry::with(['supplier', 'client', 'clientAddress', 'products'])->orderBy('id', 'desc')->paginate(15);
+        $query = MerchandiseEntry::with(['supplier', 'client', 'clientAddress', 'products'])
+            ->where('status', 'Pending');
+        
+        if ($request->has('search')) {
+            $search = $request->input('search');
+            $query->where(function($q) use ($search) {
+                $q->where('guide_number', 'like', "%{$search}%")
+                  ->orWhereHas('supplier', function($q) use ($search) {
+                      $q->where('business_name', 'like', "%{$search}%");
+                  })
+                  ->orWhereHas('client', function($q) use ($search) {
+                      $q->where('business_name', 'like', "%{$search}%");
+                  });
+            });
+        }
+        
+        $entries = $query->orderBy('id', 'desc')->paginate(15)->withQueryString();
         return response()->json($entries);
     }
     

@@ -21,6 +21,27 @@ export default function Index({ clients }) {
     const clientsData = clients.data || clients;
     const paginationLinks = clients.links || null;
 
+    useEffect(() => {
+        // Debounce search
+        const timer = setTimeout(() => {
+            if (search) {
+                router.get(route('clients.index'), { search }, {
+                    preserveState: true,
+                    preserveScroll: true,
+                    replace: true,
+                });
+            } else {
+                router.get(route('clients.index'), {}, {
+                    preserveState: true,
+                    preserveScroll: true,
+                    replace: true,
+                });
+            }
+        }, 500);
+
+        return () => clearTimeout(timer);
+    }, [search]);
+
     const { data: createData, setData: setCreateData, post, processing: creating, errors: createErrors, reset: resetCreate } = useForm({
         business_name: '',
         ruc: '',
@@ -170,12 +191,6 @@ export default function Index({ clients }) {
         });
     };
 
-    const filteredClients = clientsData.filter(client =>
-        client.business_name.toLowerCase().includes(search.toLowerCase()) ||
-        client.ruc.includes(search) ||
-        (client.email && client.email.toLowerCase().includes(search.toLowerCase()))
-    );
-
     const handlePageChange = (url) => {
         router.visit(url, {
             preserveScroll: true,
@@ -255,7 +270,7 @@ export default function Index({ clients }) {
                                         </tr>
                                     </thead>
                                     <tbody className="bg-white divide-y divide-gray-200">
-                                        {filteredClients.length === 0 ? (
+                                        {clientsData.length === 0 ? (
                                             <tr>
                                                 <td colSpan="7" className="px-6 py-12 text-center">
                                                     <div className="flex flex-col items-center justify-center">
@@ -277,7 +292,7 @@ export default function Index({ clients }) {
                                                 </td>
                                             </tr>
                                         ) : (
-                                            filteredClients.map((client) => (
+                                            clientsData.map((client) => (
                                                 <tr key={client.id} className="hover:bg-gray-50 transition-colors">
                                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                                         #{client.id}
@@ -336,10 +351,10 @@ export default function Index({ clients }) {
                                 />
                             )}
 
-                            {filteredClients.length > 0 && search && (
+                            {clientsData.length > 0 && search && (
                                 <div className="bg-gray-50 px-6 py-3 border-t border-gray-200">
                                     <div className="text-sm text-gray-700">
-                                        Mostrando <span className="font-medium">{filteredClients.length}</span> resultados
+                                        Mostrando <span className="font-medium">{clientsData.length}</span> resultados
                                     </div>
                                 </div>
                             )}

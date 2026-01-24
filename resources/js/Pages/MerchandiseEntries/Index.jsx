@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import axios from 'axios';
 import Select from 'react-select';
 import { merchandiseEntryService } from '@/services/merchandiseEntryService';
@@ -41,12 +41,10 @@ const formatDateForDisplay = (dateString) => {
     });
 };
 
-export default function Index({ auth }) {
-    const [entries, setEntries] = useState([]);
-    const [paginationData, setPaginationData] = useState(null);
-    const [filteredEntries, setFilteredEntries] = useState([]);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [loading, setLoading] = useState(true);
+export default function Index({ auth, entries: entriesProp, filters = {} }) {
+    const entriesData = entriesProp.data || entriesProp;
+    const [searchTerm, setSearchTerm] = useState(filters.search || '');
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [showProductsModal, setShowProductsModal] = useState(false);
@@ -81,69 +79,35 @@ export default function Index({ auth }) {
     const [formErrors, setFormErrors] = useState({});
 
     useEffect(() => {
-        loadEntries();
         loadSuppliers();
         loadClients();
         loadDispatches();
     }, []);
 
     useEffect(() => {
-        if (searchTerm.trim() === '') {
-            setFilteredEntries(entries);
-        } else {
-            const filtered = entries.filter(entry =>
-                entry.guide_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                entry.supplier?.business_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                entry.client?.business_name.toLowerCase().includes(searchTerm.toLowerCase())
-            );
-            setFilteredEntries(filtered);
-        }
-    }, [searchTerm, entries]);
+        // Debounce search
+        const timer = setTimeout(() => {
+            router.get(route('merchandise-entries.index'), { search: searchTerm }, {
+                preserveState: true,
+                replace: true
+            });
+        }, 500);
 
-    const loadEntries = async (url = null) => {
-        try {
-            setLoading(true);
-            const response = await merchandiseEntryService.getAll(url);
-            let pendingData;
-            
-            if (response.data) {
-                // Filtrar solo entradas con estado Pending
-                pendingData = response.data.filter(entry => entry.status === 'Pending');
-                setEntries(pendingData);
-                setFilteredEntries(pendingData);
-                setPaginationData({
-                    links: response.links,
-                    current_page: response.current_page,
-                    last_page: response.last_page,
-                    per_page: response.per_page,
-                    total: response.total
-                });
-            } else {
-                pendingData = response.filter(entry => entry.status === 'Pending');
-                const sortedData = pendingData.sort((a, b) => b.id - a.id);
-                setEntries(sortedData);
-                setFilteredEntries(sortedData);
-                setPaginationData(null);
-            }
-            setError(null);
-        } catch (err) {
-            setError('Error al cargar entradas de mercadería');
-            console.error(err);
-        } finally {
-            setLoading(false);
-        }
-    };
+        return () => clearTimeout(timer);
+    }, [searchTerm]);
 
     const handlePageChange = (url) => {
-        loadEntries(url);
+        router.visit(url);
     };
 
     const loadSuppliers = async () => {
         try {
-            const data = await supplierService.getAll();
-            setSuppliers(data);
+            const response = await supplierService.getAll();
+            // Si la respuesta es un array, usarlo directamente; sino, extraer el array de data
+            const suppliersData = Array.isArray(response) ? response : (response.data || []);
+            setSuppliers(suppliersData);
             // Convert to react-select format
-            const options = data.map(supplier => ({
+            const options = suppliersData.map(supplier => ({
                 value: supplier.id,
                 label: `${supplier.ruc_dni} - ${supplier.business_name}`
             }));
@@ -156,9 +120,11 @@ export default function Index({ auth }) {
     const loadClients = async () => {
         try {
             const response = await axios.get('/api/clients');
-            setClients(response.data);
+            // response.data puede ser un objeto paginado o un array
+            const clientsData = Array.isArray(response.data) ? response.data : (response.data.data || []);
+            setClients(clientsData);
             // Convert to react-select format
-            const options = response.data.map(client => ({
+            const options = clientsData.map(client => ({
                 value: client.id,
                 label: `${client.ruc_dni} - ${client.business_name}`
             }));
@@ -187,10 +153,12 @@ export default function Index({ auth }) {
 
     const loadDispatches = async () => {
         try {
-            const data = await dispatchService.getAll();
-            setDispatches(data);
+            const response = await dispatchService.getAll();
+            // Si la respuesta es un array, usarlo directamente; sino, extraer el array de data
+            const dispatchesData = Array.isArray(response) ? response : (response.data || []);
+            setDispatches(dispatchesData);
             // Convert to react-select format - solo despachos que no están completados
-            const options = data.map(dispatch => ({
+            const options = dispatchesData.map(dispatch => ({
                 value: dispatch.id,
                 label: `Despacho #${dispatch.id} - ${formatDateForDisplay(dispatch.dispatch_date)} - ${dispatch.driver_name}`
             }));
@@ -365,7 +333,7 @@ export default function Index({ auth }) {
                 }
             }
             
-            await loadEntries();
+            router.reload();
             handleCloseModal();
             
             if (editingEntry) {
@@ -395,7 +363,7 @@ export default function Index({ auth }) {
 
         try {
             await merchandiseEntryService.delete(id);
-            await loadEntries();
+            router.reload();
             successAlert('Eliminado', 'La entrada de mercadería ha sido eliminada exitosamente');
         } catch (err) {
             setError('Error al eliminar la entrada de mercadería');
@@ -418,7 +386,7 @@ export default function Index({ auth }) {
     const handleSelectAll = (e) => {
         if (e.target.checked) {
             // Solo seleccionar entradas con estado Pending
-            const pendingIds = filteredEntries
+            const pendingIds = entriesData
                 .filter(entry => entry.status === 'Pending')
                 .map(entry => entry.id);
             setSelectedEntries(pendingIds);
@@ -454,8 +422,7 @@ export default function Index({ auth }) {
             setSelectedEntries([]);
             setSelectedDispatch(null);
             
-            // Reload entries
-            await loadEntries();
+            router.reload();
             
             successAlert('Éxito', 'Las entradas han sido asignadas exitosamente al despacho');
         } catch (err) {
@@ -669,7 +636,7 @@ export default function Index({ auth }) {
                                                     <input
                                                         type="checkbox"
                                                         onChange={handleSelectAll}
-                                                        checked={selectedEntries.length > 0 && selectedEntries.length === filteredEntries.filter(e => e.status === 'Pending').length}
+                                                        checked={selectedEntries.length > 0 && selectedEntries.length === entriesData.filter(e => e.status === 'Pending').length}
                                                         className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                                                     />
                                                 </th>
@@ -685,14 +652,14 @@ export default function Index({ auth }) {
                                             </tr>
                                         </thead>
                                         <tbody className="bg-white divide-y divide-gray-200">
-                                            {filteredEntries.length === 0 ? (
+                                            {entriesData.length === 0 ? (
                                                 <tr>
                                                     <td colSpan={10} className="px-6 py-4 text-center text-gray-500">
                                                         {searchTerm ? 'No se encontraron entradas' : 'No hay entradas registradas'}
                                                     </td>
                                                 </tr>
                                             ) : (
-                                                filteredEntries.map((entry, index) => (
+                                                entriesData.map((entry, index) => (
                                                     <tr key={entry.id} className="hover:bg-gray-50">
                                                         <td className="px-4 py-4 whitespace-nowrap">
                                                             {entry.status === 'Pending' && (
@@ -762,9 +729,9 @@ export default function Index({ auth }) {
                             )}
 
                             {/* Pagination */}
-                            {paginationData && !searchTerm && (
+                            {entriesProp.links && (
                                 <Pagination
-                                    links={paginationData.links}
+                                    links={entriesProp.links}
                                     onPageChange={handlePageChange}
                                 />
                             )}
