@@ -82,7 +82,7 @@ class DispatchController
             'driver_name' => 'required|string|max:255',
             'driver_license' => 'required|string|max:255',
             'transport_company_name' => 'required|string|max:255',
-            'transport_company_ruc' => 'required|string|max:20',
+            'transport_company_ruc' => ['required', 'string', 'regex:/^[0-9]{11}$/'],
         ]);
 
         $dispatch = Dispatch::create($validated);
@@ -100,7 +100,7 @@ class DispatchController
             'driver_name' => 'sometimes|string|max:255',
             'driver_license' => 'sometimes|string|max:255',
             'transport_company_name' => 'sometimes|string|max:255',
-            'transport_company_ruc' => 'sometimes|string|max:20',
+            'transport_company_ruc' => ['sometimes', 'string', 'regex:/^[0-9]{11}$/'],
         ]);
 
         $dispatch->update($validated);

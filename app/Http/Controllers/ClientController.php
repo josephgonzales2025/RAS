@@ -77,9 +77,9 @@ class ClientController
     {
         $validated = $request->validate([
             'business_name' => 'required|string|max:255',
-            'ruc' => 'required|string|max:20|unique:clients,ruc_dni',
-            'email' => 'required|email|max:255',
-            'phone' => 'required|string|max:20',
+            'ruc' => ['required', 'string', 'regex:/^[0-9]{8}$|^[0-9]{11}$/', 'unique:clients,ruc_dni'],
+            'email' => 'nullable|email|max:255',
+            'phone' => 'nullable|string|max:20',
         ]);
 
         // Mapear ruc a ruc_dni para guardar en la BD
@@ -95,7 +95,8 @@ class ClientController
         }
 
         return redirect()->route('clients.index')
-            ->with('success', 'Cliente creado exitosamente');
+            ->with('success', 'Cliente creado exitosamente')
+            ->with('clientId', $client->id);
     }
 
     /**
@@ -134,9 +135,9 @@ class ClientController
     {
         $validated = $request->validate([
             'business_name' => 'required|string|max:255',
-            'ruc' => 'required|string|max:20|unique:clients,ruc_dni,' . $client->id,
-            'email' => 'required|email|max:255',
-            'phone' => 'required|string|max:20',
+            'ruc' => ['required', 'string', 'regex:/^[0-9]{8}$|^[0-9]{11}$/', 'unique:clients,ruc_dni,' . $client->id],
+            'email' => 'nullable|email|max:255',
+            'phone' => 'nullable|string|max:20',
         ]);
 
         // Mapear ruc a ruc_dni para actualizar en la BD

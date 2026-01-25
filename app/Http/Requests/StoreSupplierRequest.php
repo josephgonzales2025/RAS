@@ -22,7 +22,7 @@ class StoreSupplierRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'ruc_dni' => 'required|string|max:11|unique:suppliers',
+            'ruc_dni' => ['required', 'string', 'regex:/^[0-9]{8}$|^[0-9]{11}$/', 'unique:suppliers'],
             'business_name' => 'required|string|max:255'
         ];
     }

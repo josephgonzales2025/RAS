@@ -75,8 +75,8 @@ export default function Index({ auth, suppliers: suppliersProp, filters = {} }) 
 
         if (!formData.ruc_dni.trim()) {
             errors.ruc_dni = 'El RUC/DNI es requerido';
-        } else if (formData.ruc_dni.length > 11) {
-            errors.ruc_dni = 'El RUC/DNI no puede tener más de 11 caracteres';
+        } else if (formData.ruc_dni.length !== 8 && formData.ruc_dni.length !== 11) {
+            errors.ruc_dni = 'El RUC debe tener 11 dígitos o el DNI 8 dígitos';
         }
 
         if (!formData.business_name.trim()) {
@@ -294,14 +294,17 @@ export default function Index({ auth, suppliers: suppliersProp, filters = {} }) 
                                             id="ruc_dni"
                                             name="ruc_dni"
                                             value={formData.ruc_dni}
-                                            onChange={handleInputChange}
+                                            onChange={(e) => {
+                                                const value = e.target.value.replace(/[^0-9]/g, '');
+                                                setFormData({ ...formData, ruc_dni: value });
+                                            }}
                                             maxLength={11}
                                             className={`mt-1 block w-full rounded-md shadow-sm ${
                                                 formErrors.ruc_dni
                                                     ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
                                                     : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
                                             }`}
-                                            placeholder="Ingrese RUC o DNI"
+                                            placeholder="Ej: 20123456789 (11 dígitos) o 12345678 (8 dígitos)"
                                         />
                                         {formErrors.ruc_dni && (
                                             <p className="mt-1 text-sm text-red-600">{formErrors.ruc_dni}</p>

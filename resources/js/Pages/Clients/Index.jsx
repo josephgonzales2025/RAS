@@ -1,5 +1,6 @@
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
+import axios from 'axios';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import Modal from '@/Components/Modal';
 import InputError from '@/Components/InputError';
@@ -16,6 +17,7 @@ export default function Index({ clients }) {
     const [showEditModal, setShowEditModal] = useState(false);
     const [editingClient, setEditingClient] = useState(null);
     const [addresses, setAddresses] = useState([]);
+    const [createAddresses, setCreateAddresses] = useState([]);
 
     // Extract data and pagination from clients prop
     const clientsData = clients.data || clients;
@@ -58,12 +60,14 @@ export default function Index({ clients }) {
 
     const openCreateModal = () => {
         resetCreate();
+        setCreateAddresses([]);
         setShowCreateModal(true);
     };
 
     const closeCreateModal = () => {
         setShowCreateModal(false);
         resetCreate();
+        setCreateAddresses([]);
     };
 
     const openEditModal = (client) => {
@@ -85,18 +89,58 @@ export default function Index({ clients }) {
         resetEdit();
     };
 
-    const handleCreate = (e) => {
+    const handleCreate = async (e) => {
         e.preventDefault();
-        post(route('clients.store'), {
-            onSuccess: () => {
-                closeCreateModal();
-                successAlert('Creado', 'El cliente ha sido creado exitosamente');
-            },
-        });
+        
+        // Validar longitud del RUC
+        if (createData.ruc.length !== 11 && createData.ruc.length !== 8) {
+            errorAlert('Error', 'El RUC debe tener 11 dígitos o el DNI 8 dígitos');
+            return;
+        }
+        
+        // Validar que haya al menos una dirección
+        const validAddresses = createAddresses.filter(addr => addr.address && addr.zone);
+        if (validAddresses.length === 0) {
+            errorAlert('Error', 'Debes agregar al menos una dirección de entrega');
+            return;
+        }
+        
+        try {
+            // Primero crear el cliente usando axios para obtener el ID
+            const response = await axios.post(route('clients.store'), createData);
+            const clientId = response.data.id;
+            
+            // Luego guardar las direcciones
+            if (clientId && validAddresses.length > 0) {
+                await Promise.all(validAddresses.map(addr => 
+                    axios.post(route('client-addresses.store'), {
+                        client_id: clientId,
+                        address: addr.address,
+                        zone: addr.zone,
+                    })
+                ));
+            }
+            
+            closeCreateModal();
+            successAlert('Creado', 'El cliente ha sido creado exitosamente');
+            
+            // Recargar la página para ver el nuevo cliente
+            router.reload();
+        } catch (error) {
+            console.error('Error al crear cliente:', error);
+            errorAlert('Error', error.response?.data?.message || 'No se pudo crear el cliente');
+        }
     };
 
     const handleUpdate = (e) => {
         e.preventDefault();
+        
+        // Validar longitud del RUC
+        if (editData.ruc.length !== 11 && editData.ruc.length !== 8) {
+            errorAlert('Error', 'El RUC debe tener 11 dígitos o el DNI 8 dígitos');
+            return;
+        }
+        
         put(route('clients.update', editingClient.id), {
             onSuccess: () => {
                 saveAddresses();
@@ -108,6 +152,20 @@ export default function Index({ clients }) {
 
     const addAddress = () => {
         setAddresses([...addresses, { address: '', zone: '', isNew: true }]);
+    };
+
+    const addCreateAddress = () => {
+        setCreateAddresses([...createAddresses, { address: '', zone: '' }]);
+    };
+
+    const removeCreateAddress = (index) => {
+        setCreateAddresses(createAddresses.filter((_, i) => i !== index));
+    };
+
+    const updateCreateAddress = (index, field, value) => {
+        const newAddresses = [...createAddresses];
+        newAddresses[index][field] = value;
+        setCreateAddresses(newAddresses);
     };
 
     const removeAddress = async (index, addressId) => {
@@ -256,12 +314,6 @@ export default function Index({ clients }) {
                                                 Razón Social
                                             </th>
                                             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Email
-                                            </th>
-                                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Teléfono
-                                            </th>
-                                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                 Direcciones
                                             </th>
                                             <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -272,7 +324,7 @@ export default function Index({ clients }) {
                                     <tbody className="bg-white divide-y divide-gray-200">
                                         {clientsData.length === 0 ? (
                                             <tr>
-                                                <td colSpan="7" className="px-6 py-12 text-center">
+                                                <td colSpan="5" className="px-6 py-12 text-center">
                                                     <div className="flex flex-col items-center justify-center">
                                                         <svg className="w-16 h-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -303,16 +355,6 @@ export default function Index({ clients }) {
                                                     <td className="px-6 py-4 whitespace-nowrap">
                                                         <div className="text-sm font-medium text-gray-900">
                                                             {client.business_name}
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-6 py-4 whitespace-nowrap">
-                                                        <div className="text-sm text-gray-500">
-                                                            {client.email || '-'}
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-6 py-4 whitespace-nowrap">
-                                                        <div className="text-sm text-gray-500">
-                                                            {client.phone || '-'}
                                                         </div>
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap">
@@ -387,14 +429,17 @@ export default function Index({ clients }) {
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <InputLabel htmlFor="create_ruc" value="RUC" />
+                                <InputLabel htmlFor="create_ruc" value="RUC/DNI" />
                                 <TextInput
                                     id="create_ruc"
                                     type="text"
                                     value={createData.ruc}
-                                    onChange={(e) => setCreateData('ruc', e.target.value)}
+                                    onChange={(e) => {
+                                        const value = e.target.value.replace(/[^0-9]/g, '');
+                                        setCreateData('ruc', value);
+                                    }}
                                     className="mt-1 block w-full"
-                                    placeholder="Ej: 20123456789"
+                                    placeholder="Ej: 20123456789 (11 dígitos) o 12345678 (8 dígitos)"
                                     maxLength={11}
                                     required
                                 />
@@ -410,7 +455,6 @@ export default function Index({ clients }) {
                                     onChange={(e) => setCreateData('phone', e.target.value)}
                                     className="mt-1 block w-full"
                                     placeholder="Ej: 987654321"
-                                    required
                                 />
                                 <InputError message={createErrors.phone} className="mt-2" />
                             </div>
@@ -425,10 +469,80 @@ export default function Index({ clients }) {
                                 onChange={(e) => setCreateData('email', e.target.value)}
                                 className="mt-1 block w-full"
                                 placeholder="Ej: contacto@empresa.com"
-                                required
                             />
                             <InputError message={createErrors.email} className="mt-2" />
                         </div>
+                    </div>
+
+                    <div className="border-t border-gray-200 pt-4 mt-4">
+                        <div className="flex justify-between items-center mb-3">
+                            <div>
+                                <h3 className="text-sm font-medium text-gray-900">Direcciones de Entrega</h3>
+                                <p className="text-xs text-gray-500 mt-1">Debes agregar al menos una dirección</p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={addCreateAddress}
+                                className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none"
+                            >
+                                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                </svg>
+                                Agregar Dirección
+                            </button>
+                        </div>
+
+                        {createAddresses.length === 0 ? (
+                            <div className="text-center py-6 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                                <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                <p className="mt-2 text-sm text-gray-500">No hay direcciones agregadas</p>
+                                <p className="text-xs text-gray-400">Haz clic en "Agregar Dirección" para comenzar</p>
+                            </div>
+                        ) : (
+                            <div className="space-y-3 max-h-64 overflow-y-auto">
+                                {createAddresses.map((address, index) => (
+                                    <div key={index} className="flex gap-2 items-start p-3 bg-gray-50 rounded-lg border border-gray-200">
+                                        <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-2">
+                                            <div>
+                                                <InputLabel htmlFor={`create_address_${index}`} value="Dirección" />
+                                                <TextInput
+                                                    id={`create_address_${index}`}
+                                                    type="text"
+                                                    value={address.address}
+                                                    onChange={(e) => updateCreateAddress(index, 'address', e.target.value)}
+                                                    className="mt-1 block w-full"
+                                                    placeholder="Ej: Av. Principal 123"
+                                                />
+                                            </div>
+                                            <div>
+                                                <InputLabel htmlFor={`create_zone_${index}`} value="Zona" />
+                                                <TextInput
+                                                    id={`create_zone_${index}`}
+                                                    type="text"
+                                                    value={address.zone}
+                                                    onChange={(e) => updateCreateAddress(index, 'zone', e.target.value)}
+                                                    className="mt-1 block w-full"
+                                                    placeholder="Ej: Lima Centro"
+                                                />
+                                            </div>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => removeCreateAddress(index)}
+                                            className="mt-7 p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors"
+                                            title="Eliminar dirección"
+                                        >
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
 
                     <div className="mt-6 flex justify-end gap-3">
@@ -470,14 +584,17 @@ export default function Index({ clients }) {
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <InputLabel htmlFor="edit_ruc" value="RUC" />
+                                <InputLabel htmlFor="edit_ruc" value="RUC/DNI" />
                                 <TextInput
                                     id="edit_ruc"
                                     type="text"
                                     value={editData.ruc}
-                                    onChange={(e) => setEditData('ruc', e.target.value)}
+                                    onChange={(e) => {
+                                        const value = e.target.value.replace(/[^0-9]/g, '');
+                                        setEditData('ruc', value);
+                                    }}
                                     className="mt-1 block w-full"
-                                    placeholder="Ej: 20123456789"
+                                    placeholder="Ej: 20123456789 (11 dígitos) o 12345678 (8 dígitos)"
                                     maxLength={11}
                                     required
                                 />
@@ -493,7 +610,6 @@ export default function Index({ clients }) {
                                     onChange={(e) => setEditData('phone', e.target.value)}
                                     className="mt-1 block w-full"
                                     placeholder="Ej: 987654321"
-                                    required
                                 />
                                 <InputError message={editErrors.phone} className="mt-2" />
                             </div>
@@ -508,7 +624,6 @@ export default function Index({ clients }) {
                                 onChange={(e) => setEditData('email', e.target.value)}
                                 className="mt-1 block w-full"
                                 placeholder="Ej: contacto@empresa.com"
-                                required
                             />
                             <InputError message={editErrors.email} className="mt-2" />
                         </div>

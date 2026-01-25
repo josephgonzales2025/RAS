@@ -650,6 +650,32 @@ export default function Index({ auth, dispatches: dispatchesProp, filters = {} }
                                         </div>
 
                                         <div>
+                                            <label htmlFor="transport_company_ruc" className="block text-sm font-medium text-gray-700 mb-2">
+                                                RUC Empresa de Transporte <span className="text-red-500">*</span>
+                                            </label>
+                                            <input
+                                                type="text"
+                                                id="transport_company_ruc"
+                                                name="transport_company_ruc"
+                                                value={formData.transport_company_ruc}
+                                                onChange={(e) => {
+                                                    const value = e.target.value.replace(/[^0-9]/g, '');
+                                                    setFormData({ ...formData, transport_company_ruc: value });
+                                                }}
+                                                maxLength={11}
+                                                className={`mt-1 block w-full rounded-md shadow-sm ${
+                                                    formErrors.transport_company_ruc
+                                                        ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
+                                                        : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
+                                                }`}
+                                                placeholder="Ej: 20123456789 (11 dígitos)"
+                                            />
+                                            {formErrors.transport_company_ruc && (
+                                                <p className="mt-1 text-sm text-red-600">{formErrors.transport_company_ruc}</p>
+                                            )}
+                                        </div>
+
+                                        <div>
                                             <label htmlFor="transport_company_name" className="block text-sm font-medium text-gray-700 mb-2">
                                                 Empresa de Transporte <span className="text-red-500">*</span>
                                             </label>
@@ -668,29 +694,6 @@ export default function Index({ auth, dispatches: dispatchesProp, filters = {} }
                                             />
                                             {formErrors.transport_company_name && (
                                                 <p className="mt-1 text-sm text-red-600">{formErrors.transport_company_name}</p>
-                                            )}
-                                        </div>
-
-                                        <div className="md:col-span-2">
-                                            <label htmlFor="transport_company_ruc" className="block text-sm font-medium text-gray-700 mb-2">
-                                                RUC Empresa de Transporte <span className="text-red-500">*</span>
-                                            </label>
-                                            <input
-                                                type="text"
-                                                id="transport_company_ruc"
-                                                name="transport_company_ruc"
-                                                value={formData.transport_company_ruc}
-                                                onChange={handleInputChange}
-                                                maxLength={11}
-                                                className={`mt-1 block w-full rounded-md shadow-sm ${
-                                                    formErrors.transport_company_ruc
-                                                        ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
-                                                        : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
-                                                }`}
-                                                placeholder="Ingrese RUC (11 dígitos)"
-                                            />
-                                            {formErrors.transport_company_ruc && (
-                                                <p className="mt-1 text-sm text-red-600">{formErrors.transport_company_ruc}</p>
                                             )}
                                         </div>
                                     </div>
