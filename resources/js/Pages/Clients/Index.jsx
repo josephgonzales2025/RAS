@@ -8,7 +8,7 @@ import InputLabel from '@/Components/InputLabel';
 import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import Pagination from '@/Components/Pagination';
-import { PlusIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { confirmAlert, successAlert, errorAlert } from '@/utils/alerts';
 
 export default function Index({ clients }) {
@@ -366,15 +366,17 @@ export default function Index({ clients }) {
                                                         <div className="flex items-center justify-end gap-2">
                                                             <button
                                                                 onClick={() => openEditModal(client)}
-                                                                className="text-indigo-600 hover:text-indigo-900"
+                                                                className="text-blue-600 hover:text-blue-900"
+                                                                title="Editar"
                                                             >
-                                                                Editar
+                                                                <PencilIcon className="h-5 w-5" />
                                                             </button>
                                                             <button
                                                                 onClick={() => handleDelete(client.id, client.business_name)}
-                                                                className="text-red-600 hover:text-red-900 ml-4"
+                                                                className="text-red-600 hover:text-red-900"
+                                                                title="Eliminar"
                                                             >
-                                                                Eliminar
+                                                                <TrashIcon className="h-5 w-5" />
                                                             </button>
                                                         </div>
                                                     </td>
