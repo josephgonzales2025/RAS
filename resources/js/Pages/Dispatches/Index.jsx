@@ -55,6 +55,7 @@ export default function Index({ auth, dispatches: dispatchesProp, filters = {} }
     const [selectedEntries, setSelectedEntries] = useState([]);
     const [availableZones, setAvailableZones] = useState([]);
     const [selectedZones, setSelectedZones] = useState([]);
+    const [entriesSearchTerm, setEntriesSearchTerm] = useState('');
     
     const [formData, setFormData] = useState({
         dispatch_date: getTodayLocalDate(),
@@ -102,6 +103,12 @@ export default function Index({ auth, dispatches: dispatchesProp, filters = {} }
         try {
             const dispatch = await dispatchService.getById(dispatchId);
             const entries = dispatch.merchandiseEntries || [];
+            console.log('Entradas cargadas:', entries);
+            console.log('Primera entrada:', entries[0]);
+            if (entries[0]) {
+                console.log('clientAddress:', entries[0].clientAddress);
+                console.log('client_address:', entries[0].client_address);
+            }
             setAssignedEntries(entries);
             return entries;
         } catch (err) {
@@ -178,6 +185,7 @@ export default function Index({ auth, dispatches: dispatchesProp, filters = {} }
         setShowEntriesModal(false);
         setSelectedDispatch(null);
         setAssignedEntries([]);
+        setEntriesSearchTerm('');
     };
 
     const validateForm = () => {
@@ -820,62 +828,144 @@ export default function Index({ auth, dispatches: dispatchesProp, filters = {} }
                                     Entradas del Despacho - {selectedDispatch && formatDateForDisplay(selectedDispatch.dispatch_date)}
                                 </h3>
 
+                                {/* Buscador */}
+                                <div className="mb-4">
+                                    <input
+                                        type="text"
+                                        placeholder="Buscar por N° Guía, RUC o Razón Social..."
+                                        value={entriesSearchTerm}
+                                        onChange={(e) => setEntriesSearchTerm(e.target.value)}
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                    />
+                                </div>
+
                                 <div className="overflow-x-auto">
-                                    <table className="min-w-full divide-y divide-gray-200">
-                                        <thead className="bg-gray-50">
-                                            <tr>
-                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
-                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">N° Guía</th>
-                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
-                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Proveedor</th>
-                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dirección</th>
-                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Peso (kg)</th>
-                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Flete (S/)</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="bg-white divide-y divide-gray-200">
-                                            {assignedEntries.length === 0 ? (
-                                                <tr>
-                                                    <td colSpan={7} className="px-6 py-4 text-center text-gray-500">
-                                                        No hay entradas asignadas a este despacho
-                                                    </td>
-                                                </tr>
-                                            ) : (
-                                                assignedEntries.map((entry, index) => (
-                                                    <tr key={entry.id}>
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{index + 1}</td>
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{entry.guide_number}</td>
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{entry.client?.business_name || 'N/A'}</td>
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{entry.supplier?.business_name || 'N/A'}</td>
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                            {entry.clientAddress ? `${entry.clientAddress.address} - ${entry.clientAddress.zone}` : 'N/A'}
-                                                        </td>
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                            {parseFloat(entry.total_weight).toFixed(2)}
-                                                        </td>
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                            {parseFloat(entry.total_freight).toFixed(2)}
-                                                        </td>
-                                                    </tr>
-                                                ))
-                                            )}
-                                        </tbody>
-                                        {assignedEntries.length > 0 && (
-                                            <tfoot className="bg-gray-50">
-                                                <tr>
-                                                    <td colSpan={5} className="px-6 py-3 text-right text-sm font-semibold text-gray-900">
-                                                        TOTALES:
-                                                    </td>
-                                                    <td className="px-6 py-3 whitespace-nowrap text-sm font-semibold text-gray-900">
-                                                        {assignedEntries.reduce((sum, entry) => sum + parseFloat(entry.total_weight), 0).toFixed(2)} kg
-                                                    </td>
-                                                    <td className="px-6 py-3 whitespace-nowrap text-sm font-semibold text-gray-900">
-                                                        S/ {assignedEntries.reduce((sum, entry) => sum + parseFloat(entry.total_freight), 0).toFixed(2)}
-                                                    </td>
-                                                </tr>
-                                            </tfoot>
-                                        )}
-                                    </table>
+                                    {assignedEntries.length === 0 ? (
+                                        <div className="text-center py-8 text-gray-500">
+                                            No hay entradas asignadas a este despacho
+                                        </div>
+                                    ) : (
+                                        (() => {
+                                            // Filtrar entradas por término de búsqueda
+                                            const filteredEntries = assignedEntries.filter(entry => {
+                                                if (!entriesSearchTerm) return true;
+                                                const searchLower = entriesSearchTerm.toLowerCase();
+                                                return (
+                                                    entry.guide_number?.toLowerCase().includes(searchLower) ||
+                                                    entry.client?.business_name?.toLowerCase().includes(searchLower) ||
+                                                    entry.client?.ruc_dni?.toLowerCase().includes(searchLower) ||
+                                                    entry.supplier?.business_name?.toLowerCase().includes(searchLower) ||
+                                                    entry.supplier?.ruc_dni?.toLowerCase().includes(searchLower)
+                                                );
+                                            });
+
+                                            // Agrupar entradas por zona
+                                            const entriesByZone = filteredEntries.reduce((acc, entry) => {
+                                                // Intentar con camelCase y snake_case
+                                                const clientAddr = entry.clientAddress || entry.client_address;
+                                                const zone = clientAddr?.zone || 'Sin Zona';
+                                                if (!acc[zone]) {
+                                                    acc[zone] = [];
+                                                }
+                                                acc[zone].push(entry);
+                                                return acc;
+                                            }, {});
+
+                                            // Ordenar las zonas alfabéticamente
+                                            const sortedZones = Object.keys(entriesByZone).sort();
+
+                                            return sortedZones.map((zone) => (
+                                                <div key={zone} className="mb-6">
+                                                    <h4 className="text-md font-semibold text-gray-800 bg-gray-100 px-4 py-2 rounded mb-2">
+                                                        Zona: {zone}
+                                                    </h4>
+                                                    <table className="min-w-full divide-y divide-gray-200 mb-4 table-fixed">
+                                                        <thead className="bg-gray-50">
+                                                            <tr>
+                                                                <th className="w-12 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
+                                                                <th className="w-28 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">N° Guía</th>
+                                                                <th className="w-64 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
+                                                                <th className="w-64 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Proveedor</th>
+                                                                <th className="w-24 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Peso (kg)</th>
+                                                                <th className="w-24 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Flete (S/)</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody className="bg-white divide-y divide-gray-200">
+                                                            {entriesByZone[zone].map((entry, index) => (
+                                                                <tr key={entry.id}>
+                                                                    <td className="px-4 py-4 text-sm text-gray-900">{index + 1}</td>
+                                                                    <td className="px-4 py-4 text-sm text-gray-900 truncate" title={entry.guide_number}>{entry.guide_number}</td>
+                                                                    <td className="px-4 py-4 text-sm text-gray-900 truncate" title={entry.client?.business_name}>{entry.client?.business_name || 'N/A'}</td>
+                                                                    <td className="px-4 py-4 text-sm text-gray-900 truncate" title={entry.supplier?.business_name}>{entry.supplier?.business_name || 'N/A'}</td>
+                                                                    <td className="px-4 py-4 text-sm text-gray-900">
+                                                                        {parseFloat(entry.total_weight).toFixed(2)}
+                                                                    </td>
+                                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                                        {parseFloat(entry.total_freight).toFixed(2)}
+                                                                    </td>
+                                                                </tr>
+                                                            ))}
+                                                        </tbody>
+                                                        <tfoot className="bg-gray-100">
+                                                            <tr>
+                                                                <td colSpan={4} className="px-4 py-3 text-right text-sm font-semibold text-gray-900">
+                                                                    Subtotal {zone}:
+                                                                </td>
+                                                                <td className="px-4 py-3 text-sm font-semibold text-gray-900">
+                                                                    {entriesByZone[zone].reduce((sum, entry) => sum + parseFloat(entry.total_weight), 0).toFixed(2)} kg
+                                                                </td>
+                                                                <td className="px-4 py-3 text-sm font-semibold text-gray-900">
+                                                                    S/ {entriesByZone[zone].reduce((sum, entry) => sum + parseFloat(entry.total_freight), 0).toFixed(2)}
+                                                                </td>
+                                                            </tr>
+                                                        </tfoot>
+                                                    </table>
+                                                </div>
+                                            ));
+                                        })()
+                                    )}
+
+                                    {assignedEntries.length > 0 && (() => {
+                                        const filteredEntries = assignedEntries.filter(entry => {
+                                            if (!entriesSearchTerm) return true;
+                                            const searchLower = entriesSearchTerm.toLowerCase();
+                                            return (
+                                                entry.guide_number?.toLowerCase().includes(searchLower) ||
+                                                entry.client?.business_name?.toLowerCase().includes(searchLower) ||
+                                                entry.client?.ruc_dni?.toLowerCase().includes(searchLower) ||
+                                                entry.supplier?.business_name?.toLowerCase().includes(searchLower) ||
+                                                entry.supplier?.ruc_dni?.toLowerCase().includes(searchLower)
+                                            );
+                                        });
+
+                                        if (filteredEntries.length === 0) {
+                                            return (
+                                                <div className="text-center py-8 text-gray-500">
+                                                    No se encontraron entradas con el término de búsqueda
+                                                </div>
+                                            );
+                                        }
+
+                                        return (
+                                            <div className="border-t-2 border-gray-300 pt-4 mt-4">
+                                                <table className="min-w-full table-fixed">
+                                                    <tfoot className="bg-blue-50">
+                                                        <tr>
+                                                            <td colSpan={4} className="px-4 py-3 text-right text-sm font-bold text-gray-900">
+                                                                TOTALES GENERALES:
+                                                            </td>
+                                                            <td className="px-4 py-3 text-sm font-bold text-gray-900">
+                                                                {filteredEntries.reduce((sum, entry) => sum + parseFloat(entry.total_weight), 0).toFixed(2)} kg
+                                                            </td>
+                                                            <td className="px-4 py-3 text-sm font-bold text-gray-900">
+                                                                S/ {filteredEntries.reduce((sum, entry) => sum + parseFloat(entry.total_freight), 0).toFixed(2)}
+                                                            </td>
+                                                        </tr>
+                                                    </tfoot>
+                                                </table>
+                                            </div>
+                                        );
+                                    })()}
                                 </div>
                             </div>
 
