@@ -19,12 +19,12 @@ class DispatchController
         $query = Dispatch::with('merchandiseEntries.client', 'merchandiseEntries.supplier', 'merchandiseEntries.clientAddress');
         
         if ($request->has('search')) {
-            $search = $request->input('search');
+            $search = strtolower($request->input('search'));
             $query->where(function($q) use ($search) {
-                $q->where('driver_name', 'like', "%{$search}%")
-                  ->orWhere('driver_license', 'like', "%{$search}%")
-                  ->orWhere('transport_company_name', 'like', "%{$search}%")
-                  ->orWhere('transport_company_ruc', 'like', "%{$search}%");
+                $q->whereRaw('LOWER(driver_name) like ?', ["%{$search}%"])
+                  ->orWhereRaw('LOWER(driver_license) like ?', ["%{$search}%"])
+                  ->orWhereRaw('LOWER(transport_company_name) like ?', ["%{$search}%"])
+                  ->orWhereRaw('LOWER(transport_company_ruc) like ?', ["%{$search}%"]);
             });
         }
         

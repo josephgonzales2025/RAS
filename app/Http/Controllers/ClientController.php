@@ -17,11 +17,11 @@ class ClientController
         $query = Client::with('addresses');
         
         if ($request->has('search')) {
-            $search = $request->input('search');
+            $search = strtolower($request->input('search'));
             $query->where(function($q) use ($search) {
-                $q->where('business_name', 'like', "%{$search}%")
-                  ->orWhere('ruc_dni', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+                $q->whereRaw('LOWER(business_name) like ?', ["%{$search}%"])
+                  ->orWhereRaw('LOWER(ruc_dni) like ?', ["%{$search}%"])
+                  ->orWhereRaw('LOWER(email) like ?', ["%{$search}%"]);
             });
         }
         
