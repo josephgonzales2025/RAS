@@ -3,12 +3,14 @@ import { useState, useEffect } from 'react';
 
 export default function AuthenticatedLayout({ header, children }) {
     const { auth } = usePage().props;
-    const [sidebarOpen, setSidebarOpen] = useState(true);
+    const [sidebarOpen, setSidebarOpen] = useState(false);
 
     return (
         <div className="min-h-screen bg-gray-100">
             {/* Sidebar */}
             <aside
+                onMouseEnter={() => setSidebarOpen(true)}
+                onMouseLeave={() => setSidebarOpen(false)}
                 className={`fixed left-0 top-0 h-full bg-gray-800 text-white transition-all duration-300 z-40 ${
                     sidebarOpen ? 'w-64' : 'w-20'
                 }`}
@@ -124,7 +126,7 @@ export default function AuthenticatedLayout({ header, children }) {
             </aside>
 
             {/* Main Content */}
-            <div className={`transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-20'}`}>
+            <div className={`transition-all duration-300 ml-20`}>
                 {/* Header */}
                 {header && (
                     <header className="bg-white shadow-sm">
