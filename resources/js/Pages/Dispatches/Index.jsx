@@ -918,8 +918,8 @@ export default function Index({ auth, dispatches: dispatchesProp, filters = {} }
                                                             <tr>
                                                                 <th className="w-12 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
                                                                 <th className="w-28 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">N° Guía</th>
-                                                                <th className="w-64 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
                                                                 <th className="w-64 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Proveedor</th>
+                                                                <th className="w-64 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
                                                                 <th className="w-24 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Peso (kg)</th>
                                                                 <th className="w-24 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Flete (S/)</th>
                                                             </tr>
@@ -929,8 +929,8 @@ export default function Index({ auth, dispatches: dispatchesProp, filters = {} }
                                                                 <tr key={entry.id}>
                                                                     <td className="px-4 py-4 text-sm text-gray-900">{index + 1}</td>
                                                                     <td className="px-4 py-4 text-sm text-gray-900 truncate" title={entry.guide_number}>{entry.guide_number}</td>
-                                                                    <td className="px-4 py-4 text-sm text-gray-900 truncate" title={entry.client?.business_name}>{entry.client?.business_name || 'N/A'}</td>
                                                                     <td className="px-4 py-4 text-sm text-gray-900 truncate" title={entry.supplier?.business_name}>{entry.supplier?.business_name || 'N/A'}</td>
+                                                                    <td className="px-4 py-4 text-sm text-gray-900 truncate" title={entry.client?.business_name}>{entry.client?.business_name || 'N/A'}</td>
                                                                     <td className="px-4 py-4 text-sm text-gray-900">
                                                                         {parseFloat(entry.total_weight).toFixed(2)}
                                                                     </td>
