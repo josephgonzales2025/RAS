@@ -17,16 +17,16 @@ class MerchandiseEntryController
             ->where('status', 'Pending');
         
         if ($request->has('search')) {
-            $search = $request->input('search');
+            $search = strtolower($request->input('search'));
             $query->where(function($q) use ($search) {
-                $q->where('guide_number', 'like', "%{$search}%")
+                $q->whereRaw('LOWER(guide_number) like ?', ["%{$search}%"])
                   ->orWhereHas('supplier', function($q) use ($search) {
-                      $q->where('business_name', 'like', "%{$search}%")
-                        ->orWhere('ruc_dni', 'like', "%{$search}%");
+                      $q->whereRaw('LOWER(business_name) like ?', ["%{$search}%"])
+                        ->orWhereRaw('LOWER(ruc_dni) like ?', ["%{$search}%"]);
                   })
                   ->orWhereHas('client', function($q) use ($search) {
-                      $q->where('business_name', 'like', "%{$search}%")
-                        ->orWhere('ruc_dni', 'like', "%{$search}%");
+                      $q->whereRaw('LOWER(business_name) like ?', ["%{$search}%"])
+                        ->orWhereRaw('LOWER(ruc_dni) like ?', ["%{$search}%"]);
                   });
             });
         }
