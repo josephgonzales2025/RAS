@@ -56,6 +56,7 @@ export default function Index({ auth, dispatches: dispatchesProp, filters = {} }
     const [availableZones, setAvailableZones] = useState([]);
     const [selectedZones, setSelectedZones] = useState([]);
     const [entriesSearchTerm, setEntriesSearchTerm] = useState('');
+    const [selectedZoneFilter, setSelectedZoneFilter] = useState('');
     
     const [formData, setFormData] = useState({
         dispatch_date: getTodayLocalDate(),
@@ -186,6 +187,7 @@ export default function Index({ auth, dispatches: dispatchesProp, filters = {} }
         setSelectedDispatch(null);
         setAssignedEntries([]);
         setEntriesSearchTerm('');
+        setSelectedZoneFilter('');
     };
 
     const validateForm = () => {
@@ -822,21 +824,41 @@ export default function Index({ auth, dispatches: dispatchesProp, filters = {} }
                     <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
                         <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" onClick={handleCloseEntriesModal}></div>
                         <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-                        <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
+                        <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-7xl sm:w-full">
                             <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                                 <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
                                     Entradas del Despacho - {selectedDispatch && formatDateForDisplay(selectedDispatch.dispatch_date)}
                                 </h3>
 
-                                {/* Buscador */}
-                                <div className="mb-4">
-                                    <input
-                                        type="text"
-                                        placeholder="Buscar por N° Guía, RUC o Razón Social..."
-                                        value={entriesSearchTerm}
-                                        onChange={(e) => setEntriesSearchTerm(e.target.value)}
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                    />
+                                {/* Filtros */}
+                                <div className="mb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <input
+                                            type="text"
+                                            placeholder="Buscar por N° Guía, RUC o Razón Social..."
+                                            value={entriesSearchTerm}
+                                            onChange={(e) => setEntriesSearchTerm(e.target.value)}
+                                            className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                        />
+                                    </div>
+                                    <div>
+                                        <select
+                                            value={selectedZoneFilter}
+                                            onChange={(e) => setSelectedZoneFilter(e.target.value)}
+                                            className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                        >
+                                            <option value="">Todas las zonas</option>
+                                            {(() => {
+                                                const zones = [...new Set(assignedEntries.map(entry => {
+                                                    const clientAddr = entry.clientAddress || entry.client_address;
+                                                    return clientAddr?.zone || 'Sin Zona';
+                                                }))];
+                                                return zones.sort().map(zone => (
+                                                    <option key={zone} value={zone}>{zone}</option>
+                                                ));
+                                            })()}
+                                        </select>
+                                    </div>
                                 </div>
 
                                 <div className="overflow-x-auto">
@@ -846,17 +868,29 @@ export default function Index({ auth, dispatches: dispatchesProp, filters = {} }
                                         </div>
                                     ) : (
                                         (() => {
-                                            // Filtrar entradas por término de búsqueda
+                                            // Filtrar entradas por término de búsqueda y zona
                                             const filteredEntries = assignedEntries.filter(entry => {
-                                                if (!entriesSearchTerm) return true;
-                                                const searchLower = entriesSearchTerm.toLowerCase();
-                                                return (
-                                                    entry.guide_number?.toLowerCase().includes(searchLower) ||
-                                                    entry.client?.business_name?.toLowerCase().includes(searchLower) ||
-                                                    entry.client?.ruc_dni?.toLowerCase().includes(searchLower) ||
-                                                    entry.supplier?.business_name?.toLowerCase().includes(searchLower) ||
-                                                    entry.supplier?.ruc_dni?.toLowerCase().includes(searchLower)
-                                                );
+                                                // Filtro de búsqueda por texto
+                                                if (entriesSearchTerm) {
+                                                    const searchLower = entriesSearchTerm.toLowerCase();
+                                                    const matchesSearch = (
+                                                        entry.guide_number?.toLowerCase().includes(searchLower) ||
+                                                        entry.client?.business_name?.toLowerCase().includes(searchLower) ||
+                                                        entry.client?.ruc_dni?.toLowerCase().includes(searchLower) ||
+                                                        entry.supplier?.business_name?.toLowerCase().includes(searchLower) ||
+                                                        entry.supplier?.ruc_dni?.toLowerCase().includes(searchLower)
+                                                    );
+                                                    if (!matchesSearch) return false;
+                                                }
+                                                
+                                                // Filtro por zona
+                                                if (selectedZoneFilter) {
+                                                    const clientAddr = entry.clientAddress || entry.client_address;
+                                                    const zone = clientAddr?.zone || 'Sin Zona';
+                                                    if (zone !== selectedZoneFilter) return false;
+                                                }
+                                                
+                                                return true;
                                             });
 
                                             // Agrupar entradas por zona
@@ -927,15 +961,27 @@ export default function Index({ auth, dispatches: dispatchesProp, filters = {} }
 
                                     {assignedEntries.length > 0 && (() => {
                                         const filteredEntries = assignedEntries.filter(entry => {
-                                            if (!entriesSearchTerm) return true;
-                                            const searchLower = entriesSearchTerm.toLowerCase();
-                                            return (
-                                                entry.guide_number?.toLowerCase().includes(searchLower) ||
-                                                entry.client?.business_name?.toLowerCase().includes(searchLower) ||
-                                                entry.client?.ruc_dni?.toLowerCase().includes(searchLower) ||
-                                                entry.supplier?.business_name?.toLowerCase().includes(searchLower) ||
-                                                entry.supplier?.ruc_dni?.toLowerCase().includes(searchLower)
-                                            );
+                                            // Filtro de búsqueda por texto
+                                            if (entriesSearchTerm) {
+                                                const searchLower = entriesSearchTerm.toLowerCase();
+                                                const matchesSearch = (
+                                                    entry.guide_number?.toLowerCase().includes(searchLower) ||
+                                                    entry.client?.business_name?.toLowerCase().includes(searchLower) ||
+                                                    entry.client?.ruc_dni?.toLowerCase().includes(searchLower) ||
+                                                    entry.supplier?.business_name?.toLowerCase().includes(searchLower) ||
+                                                    entry.supplier?.ruc_dni?.toLowerCase().includes(searchLower)
+                                                );
+                                                if (!matchesSearch) return false;
+                                            }
+                                            
+                                            // Filtro por zona
+                                            if (selectedZoneFilter) {
+                                                const clientAddr = entry.clientAddress || entry.client_address;
+                                                const zone = clientAddr?.zone || 'Sin Zona';
+                                                if (zone !== selectedZoneFilter) return false;
+                                            }
+                                            
+                                            return true;
                                         });
 
                                         if (filteredEntries.length === 0) {
